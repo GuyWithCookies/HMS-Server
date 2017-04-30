@@ -1,0 +1,47 @@
+<navbar></navbar>
+<div class="col-xs-12 col-xs-offset-0 col-md-4 col-sm-offset-4">
+    <img src="../img/logo.png"/>
+    <h1>Neuen Mitarbeiter hinzufügen</h1>
+    <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
+    <div ng-show="success" class="alert alert-success">{{successMessage}}</div>
+
+    <form class="form" ng-submit="register()">
+        <div class="form-group">
+            <label>Vorname</label>
+            <input type="text" class="form-control" name="forename" ng-model="user.forename" required>
+        </div>
+        <div class="form-group">
+            <label>Nachname</label>
+            <input type="text" class="form-control" name="username" ng-model="user.username" required>
+        </div>
+
+        <div class="form-group" ng-class="{
+        'has-error':user.password!==passwordcheck && passwordcheck.length>0,
+        'has-success':user.password===passwordcheck && passwordcheck.length>0,
+        'has-feedback':true
+        }">
+            <label>Passwort</label>
+            <input type="password" class="form-control"     name="password" ng-model="user.password" required>
+        </div>
+
+        <div class="form-group">
+            <label>Passwort wiederholen</label>
+            <input type="password" class="form-control" name="passwordcheck" ng-model="passwordcheck" required>
+        </div>
+
+        <div class="checkbox">
+            <label><input type="checkbox" ng-model="user.admin"><span style="padding-left: 0.5em">Admin-Zugang</span></label>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success pull-right" ng-disabled="disabled">registrieren</button>
+        </div>
+
+    </form>
+
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+</div>

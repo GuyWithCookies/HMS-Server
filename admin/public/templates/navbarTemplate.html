@@ -1,0 +1,21 @@
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".mynavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+      <a class="navbar-brand" href="/#/main">HMS Günther</a>
+    </div>
+
+    <ul class="collapse navbar-collapse nav navbar-nav mynavbar" >
+      <li ng-repeat="view in views" ng-class="{'active': view.active, 'navbar-right':view.right}">
+        <a href={{view.link}} ng-click="changeActiveTab(view.link)"><span ng-show="view.symbol" class="glyphicon glyphicon-{{view.symbol}}"></span> {{view.text}}</a>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right collapse navbar-collapse mynavbar">
+      <li><a href="#" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Ausloggen</a></li>
+    </ul>
+  </div>
+</nav>

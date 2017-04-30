@@ -1,0 +1,40 @@
+{
+  "name": "vbsite",
+  "description": "VBSITE",
+  "license": "MIT",
+  "moduleType": [
+    "node"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "override": {
+    "angular-ui-router-tabs": {
+      "dependencies": {}
+    }
+  },
+  "dependencies": {
+    "angular-animate": "1.4.9",
+    "angular-ui-grid": "latest",
+    "angular-aria": "1.4.9",
+    "angular-ui-router": "^0.2.18",
+    "bootstrap": "^3.3.6",
+    "angular": "1.4.9",
+    "angular-vs-repeat": "^1.1.7",
+    "angular-bootstrap": "^1.3.0",
+    "jquery": "latest",
+    "angular-ui-select": "^0.17.1",
+    "angular-sanitize": "^1.5.5",
+    "angular-route": "^1.5.7",
+    "DateJS": "datejs#^1.0.0-rc3"
+  },
+  "resolutions": {
+    "angular": ">=1.2.16 1.4.x"
+  }
+}

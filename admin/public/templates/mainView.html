@@ -1,0 +1,75 @@
+<navbar></navbar>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-xs-offset-0 col-md-10 col-sm-offset-1">
+
+            <uib-accordion>
+
+                <div uib-accordion-group class="panel-default"
+                     ng-repeat="user in userList track by $index">
+                    <uib-accordion-heading>
+                        <div ng-click="getEvents(user.username)">
+                            {{user.forename}} {{user.username}}
+                        </div>
+                        <span class="pull-right glyphicon glyphicon-envelope"></span>
+                        <span class="pull-right glyphicon glyphicon-file"></span>
+
+                        <div class="clearfix"></div>
+                    </uib-accordion-heading>
+                    <div class="well">
+                        <div class="btn-group">
+
+                            <button
+                                    class="btn btn-primary"
+                                    mwl-date-modifier
+                                    date="viewDate"
+                                    decrement="calendarView"
+                                    ng-click="cellIsOpen = false">
+                                Previous
+                            </button>
+                            <button
+                                    class="btn btn-default"
+                                    mwl-date-modifier
+                                    date="viewDate"
+                                    set-to-today
+                                    ng-click="cellIsOpen = false">
+                                Today
+                            </button>
+                            <button
+                                    class="btn btn-primary"
+                                    mwl-date-modifier
+                                    date="viewDate"
+                                    increment="calendarView"
+                                    ng-click="cellIsOpen = false">
+                                Next
+                            </button>
+                        </div>
+                        <div class="btn-group pull-right">
+                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'"
+                                   ng-click="cellIsOpen = false">Jahr</label>
+                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'"
+                                   ng-click="vm.cellIsOpen = false">Monat</label>
+                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'"
+                                   ng-click="vm.cellIsOpen = false">Woche</label>
+                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'"
+                                   ng-click="vm.cellIsOpen = false">Tag</label>
+                        </div>
+                    </div>
+
+
+                    <mwl-calendar
+                            events="events"
+                            view="calendarView"
+                            view-title="calendarTitle"
+                            view-date="viewDate"
+                            cell-is-open="cellIsOpen"
+                            day-view-start="04:00"
+                            day-view-end="20:00"
+                            day-view-split="30"
+                            cell-auto-open-disabled="true"
+                    </mwl-calendar>
+                </div>
+            </uib-accordion>
+        </div>
+    </div>
+</div>
