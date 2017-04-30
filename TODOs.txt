@@ -1,3 +1,8 @@
 APP:
 
 Eintragen --> Tag Ort Arbeit RasenFläche Bemerkungen
+
+MongoDB:
+   Root User:     admin
+   Root Password: cfKyF1LxEmZy
+   Database Name: hmsserver
