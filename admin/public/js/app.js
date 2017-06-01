@@ -1,9 +1,10 @@
-var app = angular.module('app', ['ngRoute', "ui.bootstrap", "mwl.calendar"]);
+var app = angular.module('app', ['ngRoute', "ui.bootstrap", "mwl.calendar", 'ngMap']);
 
 app.config(["$routeProvider", "$logProvider", "calendarConfig", "moment",
-function ($routeProvider, $logProvider, calendarConfig, moment) {
+function ($routeProvider, $logProvider, calendarConfig, moment){
+
     $routeProvider
-        .when('/login', {
+    .when('/login', {
             templateUrl: '../templates/loginView.html',
             controller: 'loginViewController',
             access: {restricted: false}

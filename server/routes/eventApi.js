@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
+var moment = require('moment');
 
 var Event = require('../models/event.js');
+var GpsPosition = require('../models/gps.js');
 
 
 router.post('/get', function(req, res) {
@@ -15,7 +17,7 @@ router.post('/get', function(req, res) {
     }else{
         username = req.body.username
     }
-    console.log(username);
+
     Event.find({
         "username": username
     }, function(err, docs) {
@@ -26,7 +28,6 @@ router.post('/get', function(req, res) {
                 msg: err
             });
         }
-        var events = docs;
         /*
          If performance goes down ?
          for(var i=0; i<docs.length; i++) {
@@ -34,9 +35,9 @@ router.post('/get', function(req, res) {
          events.push(docs[i])
          //}
          }*/
-        console.log(events);
+        console.log(docs);
         res.json({
-            data: events,
+            data: docs,
             status: "OK"
         })
     })
@@ -63,7 +64,7 @@ router.post('/update', function(req, res) {
                 msg: err
             });
         }
-        console.log(doc);
+
         doc.title = title;
         doc.startsAt = startsAt;
         doc.endsAt = endsAt;
@@ -93,8 +94,6 @@ router.post('/set', function(req, res) {
     var activity = req.body.activity;
     var type = req.body.type;
 
-    console.log(req.body);
-
     var event = new Event({
         title: title,
         startsAt: startsAt,
@@ -107,16 +106,115 @@ router.post('/set', function(req, res) {
     });
 
     event.save(function(err, event) {
-        if (err) return console.error(err);
-        console.log("new Event saved:");
-        console.log(event);
+        if (err) {
+            console.log(err);
+            res.json({
+                data: event,
+                status: "Error"
+            });
+        }
+        res.json({
+            data: event,
+            status: "OK"
+        })
+
     });
+});
 
-    res.json({
-        data: event,
-        status: "OK"
+router.post('/removeDay', function(req, res) {
+    //date should be unix timestamp
+    var date = moment(req.body.date).toISOString();
+    var username = req.body.username;
+    console.log("Date :"+date);
+    console.log(username);
+    Event.find({
+        "username": username
+    }, function(err, docs) {
+        if (err) {
+            console.log(err);
+            res.json({
+                status: "ERROR",
+                msg: err
+            });
+        }
+
+        for(var i=0; i<docs.length; i++) {
+            console.log(moment(docs[i].startsAt*1000).toISOString());
+            console.log(moment(docs[i].startsAt*1000).isSame(date, "day"));
+            if (moment(docs[i].startsAt*1000).isSame(date, "day")) {
+                console.log("Remove");
+                docs[i].remove();
+            }
+        }
+
+        res.json({
+            status: "OK"
+        })
     })
+});
 
+router.post('/saveGpsPosition', function(req, res) {
+    var time = moment(req.body.time).unix();
+    var username = req.body.username;
+    var longitude = req.body.long;
+    var latitude = req.body.lat;
+
+    var positionData = {
+        time: time,
+        username:username,
+        longitude:longitude,
+        latitude: latitude
+    };
+
+    var newPosition = new GpsPosition(positionData);
+    newPosition.save(function (err, position) {
+        if (err) {
+            console.log(err);
+            res.json({
+                data: err,
+                status: "Error"
+            });
+        }
+        res.json({
+            data: position,
+            status: "OK"
+        })
+    });
+});
+
+router.post("/getGpsPositions", function (req, res) {
+    //date should be unix timestamp
+    var date = moment(req.body.date*1000);
+    var username = req.body.username;
+
+    GpsPosition.find({
+        "username": username
+    }, function(err, docs) {
+        if (err) {
+            console.log(err);
+            res.json({
+                status: "ERROR",
+                msg: err
+            });
+        }
+
+        var matchedPositions = [];
+
+        for(var i=0; i<docs.length; i++) {
+            if (moment(docs[i].time*1000).isSame(date, "day")) {
+                matchedPositions.push({
+                    pos:[parseFloat(docs[i].latitude)+ (Math.random()/10),
+                        parseFloat(docs[i].longitude)+ (Math.random()/10)],
+                    time:docs[i].time
+                });
+            }
+        }
+
+        res.json({
+            status: "OK",
+            positions: matchedPositions
+        })
+    })
 });
 
 module.exports = router;

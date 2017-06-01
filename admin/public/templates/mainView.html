@@ -2,57 +2,74 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12 col-xs-offset-0 col-md-10 col-sm-offset-1">
-
             <uib-accordion>
 
                 <div uib-accordion-group class="panel-default"
                      ng-repeat="user in userList track by $index">
                     <uib-accordion-heading>
-                        <div ng-click="getEvents(user.username)">
-                            {{user.forename}} {{user.username}}
+                        <div>
+                            <div ng-click="getEvents(user.username)">
+                                {{user.forename}} {{user.username}}
+                            </div>
                         </div>
-                        <span class="pull-right glyphicon glyphicon-envelope"></span>
-                        <span class="pull-right glyphicon glyphicon-file"></span>
-
                         <div class="clearfix"></div>
                     </uib-accordion-heading>
                     <div class="well">
-                        <div class="btn-group">
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <div class="btn-group">
+                                    <button
+                                            class="btn btn-primary"
+                                            mwl-date-modifier
+                                            date="viewDate"
+                                            decrement="calendarView"
+                                            ng-click="cellIsOpen = false">
+                                        Zurück
+                                    </button>
+                                    <button
+                                            class="btn btn-default"
+                                            mwl-date-modifier
+                                            date="viewDate"
+                                            set-to-today
+                                            ng-click="cellIsOpen = false">
+                                        Heute
+                                    </button>
+                                    <button
+                                            class="btn btn-primary"
+                                            mwl-date-modifier
+                                            date="viewDate"
+                                            increment="calendarView"
+                                            ng-click="cellIsOpen = false">
+                                        Vor
+                                    </button>
+                                </div>
 
-                            <button
-                                    class="btn btn-primary"
-                                    mwl-date-modifier
-                                    date="viewDate"
-                                    decrement="calendarView"
-                                    ng-click="cellIsOpen = false">
-                                Previous
-                            </button>
-                            <button
-                                    class="btn btn-default"
-                                    mwl-date-modifier
-                                    date="viewDate"
-                                    set-to-today
-                                    ng-click="cellIsOpen = false">
-                                Today
-                            </button>
-                            <button
-                                    class="btn btn-primary"
-                                    mwl-date-modifier
-                                    date="viewDate"
-                                    increment="calendarView"
-                                    ng-click="cellIsOpen = false">
-                                Next
-                            </button>
-                        </div>
-                        <div class="btn-group pull-right">
-                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'"
-                                   ng-click="cellIsOpen = false">Jahr</label>
-                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'"
-                                   ng-click="vm.cellIsOpen = false">Monat</label>
-                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'"
-                                   ng-click="vm.cellIsOpen = false">Woche</label>
-                            <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'"
-                                   ng-click="vm.cellIsOpen = false">Tag</label>
+                                <div class="btn-group">
+                                    <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'"
+                                           ng-click="cellIsOpen = false">Jahr</label>
+                                    <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'"
+                                           ng-click="vm.cellIsOpen = false">Monat</label>
+                                    <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'"
+                                           ng-click="vm.cellIsOpen = false">Woche</label>
+                                    <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'"
+                                           ng-click="vm.cellIsOpen = false">Tag</label>
+                                </div>
+                            </div>
+                            <div style="font-size: 2em;" class="col-sm-3">
+                                <span class="pull-right glyphicon glyphicon-envelope"
+                                      uib-tooltip="Positionsanzeige"
+                                      style="margin-left: 10px;"
+                                      tooltip-popup-delay="1000"></span>
+                                <span class="pull-right glyphicon glyphicon-file"
+                                      uib-tooltip="Erstelle einen Zeitplan als PDF zum Download
+                                      (Tag, Woche, Monat, Jahr)"
+                                      tooltip-popup-delay="1000"></span>
+                                <span class="glyphicon glyphicon-map-marker pull-right"
+                                      uib-tooltip="Zeige die Positionen auf der Karte an"
+                                      tooltip-popup-delay="1000"
+                                      style="margin-right: 10px;"
+                                      ng-click="openMapModal(user.username)"></span>
+                            </div>
                         </div>
                     </div>
 
@@ -73,3 +90,40 @@
         </div>
     </div>
 </div>
+
+
+<script type="text/ng-template" id="map.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Positionsanzeige für {{$ctrl.username}}</h3>
+    </div>
+    <div class="modal-body" id="modal-body">
+        <ng-map zoom="14" center="[51.02, 13.72]" zoom-to-include-markers="auto"
+                map-lazy-load="https://maps.google.com/maps/api/js"
+                map-lazy-load-params="{{$ctrl.googleMapsUrl}}">
+            <marker ng-repeat="p in $ctrl.positions" position="{{p.pos}}"></marker>
+
+            <info-window id="iw">
+                <div ng-non-bindable="">
+                    Zeit: {{marker.time|date:'hh:mm:ss'}}
+                </div>
+            </info-window>
+        </ng-map>
+    </div>
+    <div class="modal-footer">
+        <p class="input-group">
+            <input type="text" class="form-control" uib-datepicker-popup="dd MMMM yyyy"
+                   ng-model="$ctrl.datepicker.date" ng-change="$ctrl.getGpsPositions()"
+                   is-open="$ctrl.datepicker.opened" datepicker-options="dateOptions"
+                   close-text="Abbrechen"
+                   placeholder="Datum"
+            />
+            <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.datepicker.opened = !$ctrl.datepicker.opened">
+                <i class="glyphicon glyphicon-calendar"></i></button>
+          </span>
+        </p>
+        <div class="alert alert-warning" ng-show="$ctrl.errorMessage!==''">
+            <span class="glyphicon glyphicon-info-sign"></span> {{$ctrl.errorMessage}}</div>
+        <button class="btn btn-success pull-right" type="button" ng-click="$ctrl.ok()">Fertig</button>
+    </div>
+</script>

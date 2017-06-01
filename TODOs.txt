@@ -1,8 +1,15 @@
-APP:
+ServerAdminBereich:
+Test Map with real gps data (remove position randomization)
+Implement time view on markers in map
 
-Eintragen --> Tag Ort Arbeit RasenFläche Bemerkungen
+
 
 MongoDB:
    Root User:     admin
    Root Password: cfKyF1LxEmZy
    Database Name: hmsserver
+
+RockMongo:
+    RockMongo User: admin
+    RockMongo Password: cfKyF1LxEmZy
+    URL: https://hmsserver-guywithcookies.rhcloud.com/rockmongo/

@@ -9,6 +9,9 @@ module.exports = function(grunt) {
                 },
                 mainFiles : {
                     bootstrap : ['dist/css/bootstrap.css', 'dist/js/bootstrap.min.js']
+                },
+                dependencies: {
+                    'angular-google-maps': ['angular', "lodash", "angular-simple-logger"]
                 }
             }
         },
@@ -31,4 +34,4 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.registerTask("default", [ "bower_concat", "copy"]);
-}
+};

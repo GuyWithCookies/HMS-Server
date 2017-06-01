@@ -122,7 +122,6 @@ hr {
 }
 /* Home Style */
 header {
-	background: url(../img/header-bg.jpg) no-repeat bottom center;
 	background-size: cover;
 	color: #cfcfcf;
 	position: relative;
@@ -399,7 +398,6 @@ label {
 }
 a:focus, .btn:focus, .btn:active:focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn.active.focus {
 	outline: none;
-	outline-offset: none;
 }
 /* Social Section */
 #social-section {
@@ -444,14 +442,16 @@ a:focus, .btn:focus, .btn:active:focus, .btn.active:focus, .btn.focus, .btn:acti
 }
 
 @media (max-width: 603px) {
-#menu.navbar-default {
-	background-color: rgba(0, 0, 0, 0.7);
-}
-label {
-	float: none !important
-}
-.hover-bg .hover-text {
-	padding: 15% 10%;
-}
+	#menu.navbar-default {
+		background-color: rgba(0, 0, 0, 0.7);
+	}
+
+	label {
+		float: none !important
+	}
+
+	.hover-bg .hover-text {
+		padding: 15% 10%;
+	}
 }
 

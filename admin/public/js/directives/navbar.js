@@ -13,12 +13,7 @@ app.directive("navbar", ["$location", "AuthService", function($location, AuthSer
             $scope.views = [
                 {
                     'link': "#/main",
-                    'text': "Übersicht"
-                },
-                {
-                    'link': "#/calendar?",
-                    'text': "Kalender",
-                    "symbol": "calendar"
+                    'text': "Kalender"
                 },
                 {
                     'link': "#/register",

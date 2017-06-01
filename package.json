@@ -30,11 +30,13 @@
     "grunt-cli": "^1.2.0",
     "grunt-contrib-concat": "^1.0.0",
     "grunt-contrib-copy": "^1.0.0",
+    "moment": "^2.18.1",
     "mongoose": "^4.4.5",
     "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^4.0.0",
+    "pdfmake": "^0.1.29",
     "prerender-node": "^2.5.0"
   },
   "engines": {
