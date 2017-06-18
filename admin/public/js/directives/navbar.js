@@ -19,6 +19,10 @@ app.directive("navbar", ["$location", "AuthService", function($location, AuthSer
                     'link': "#/register",
                     'text': "Neuer Mitarbeiter",
                     'symbol': 'user'
+                },
+                {
+                    'link': "#/emailSettings",
+                    'text': "E-Mail Einstellungen",
                 }];
 
 

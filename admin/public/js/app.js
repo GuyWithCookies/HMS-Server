@@ -16,7 +16,12 @@ function ($routeProvider, $logProvider, calendarConfig, moment){
         .when('/register', {
             templateUrl: '../templates/registerView.html',
             controller: 'registerViewController',
-            access: {restricted: false}
+            access: {restricted: true}
+        })
+        .when('/emailSettings', {
+            templateUrl: '../templates/regularMailSettingsView.html',
+            controller: 'regularMailSettingsController',
+            access: {restricted: true}
         })
         .when('/main', {
             templateUrl: '../templates/mainView.html',

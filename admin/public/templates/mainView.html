@@ -8,7 +8,7 @@
                      ng-repeat="user in userList track by $index">
                     <uib-accordion-heading>
                         <div>
-                            <div ng-click="getEvents(user.username)">
+                            <div ng-click="getEvents(user.username)" style="text-align: center;">
                                 {{user.forename}} {{user.username}}
                             </div>
                         </div>
@@ -56,13 +56,10 @@
                                 </div>
                             </div>
                             <div style="font-size: 2em;" class="col-sm-3">
-                                <span class="pull-right glyphicon glyphicon-envelope"
-                                      uib-tooltip="Positionsanzeige"
-                                      style="margin-left: 10px;"
-                                      tooltip-popup-delay="1000"></span>
                                 <span class="pull-right glyphicon glyphicon-file"
-                                      uib-tooltip="Erstelle einen Zeitplan als PDF zum Download
-                                      (Tag, Woche, Monat, Jahr)"
+                                      uib-tooltip="Erstelle einen Zeitplan als PDF zum Download oder als E-Mail
+                                      (Woche, Monat, Jahr)"
+                                      ng-click="openPDFModal(user)"
                                       tooltip-popup-delay="1000"></span>
                                 <span class="glyphicon glyphicon-map-marker pull-right"
                                       uib-tooltip="Zeige die Positionen auf der Karte an"
@@ -90,6 +87,81 @@
         </div>
     </div>
 </div>
+
+<script type="text/ng-template" id="pdfGeneratorModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="title">
+            Arbeitszeitnachweis für {{$pdf.docData.forename}} {{$pdf.username}} erstellen
+        </h3>
+    </div>
+    <div class="modal-body col-sm-12" id="pdf">
+        <form class="form-horizontal col-sm-8 col-sm-offset-2">
+            <div class="form-group">
+                <select name="timeRange" id="timeRange" ng-model="$pdf.docData.timeRange.range"
+                        ng-change="$pdf.timeRangeChanged()">
+                    <option value="">---Zeitraum---</option>
+                    <option value="w">Woche</option>
+                    <option value="m">Monat</option>
+                    <option value="y">Jahr</option>
+                </select>
+            </div>
+            <div class="form-group" style="padding-top: 1em;">
+                <p class="input-group" ng-show="$pdf.datepicker.show">
+                    <input type="text" class="form-control"
+                           ng-change="$pdf.rstBtn();"
+                           uib-datepicker-popup="{{$pdf.datepicker.format}}"
+                           ng-model="$pdf.docData.timeRange.date"
+                           is-open="$pdf.datepicker.opened" datepicker-options="dateOptions"
+                           close-text="Abbrechen"
+                           placeholder="konkreten Zeitraum auswählen"
+                           ng-focus="$pdf.datepicker.opened = !$pdf.datepicker.opened"
+                    />
+                    <span class="input-group-btn">
+                                <button type="button" class="btn btn-default"
+                                        ng-click="$pdf.datepicker.opened = !$pdf.datepicker.opened">
+                                <i class="glyphicon glyphicon-calendar"></i></button>
+                            </span>
+                </p>
+            </div>
+            <hr>
+            <div class="form-group form-inline row col-sm-12">
+                <label class="col-sm-6"><input type="checkbox" class="checkbox"
+                              ng-change="$pdf.rstBtn();"
+                              ng-model="$pdf.docData.coverSheet" style="padding-right: 2em">Deckblatt</label>
+                <label class="col-sm-6"><input type="checkbox" class="checkbox"
+                              ng-change="$pdf.rstBtn();"
+                              ng-model="$pdf.docData.summary">Zusammenfassung</label>
+            </div>
+            <hr>
+            <div class="form-group">
+                <label class="radio-inline">
+                    <input type="radio" name="optradio" ng-model="$pdf.docData.receiveType" value="saveOnClient">
+                    Lokal speichern
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="optradio" ng-model="$pdf.docData.receiveType" value="email">
+                    Per E-Mail senden
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="email" ng-model="$pdf.docData.email" ng-show="$pdf.docData.receiveType==='email'"
+                       placeholder="E-Mail Empfänger">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div class="alert alert-warning" ng-show="$pdf.errorMessage!==''">
+            <span class="glyphicon glyphicon-info-sign"></span> {{$pdf.errorMessage}}</div>
+
+        <a class="btn btn-success pull-right" href="../pdf/Arbeitszeitnachweis.pdf"
+           ng-show="$pdf.downloadable">
+            Download PDF
+        </a>
+        <button class="btn btn-primary pull-right" type="button" ng-show="!$pdf.downloadable"
+                ng-click="$pdf.generatePDF()">Generieren</button>
+        <button class="btn btn-danger pull-right" type="button" ng-click="$pdf.ok()">Abbrechen</button>
+    </div>
+</script>
 
 
 <script type="text/ng-template" id="map.html">

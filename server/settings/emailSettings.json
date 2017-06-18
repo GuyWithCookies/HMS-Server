@@ -1,0 +1,11 @@
+{
+    "email": "Benni.Schimke@web.de",
+    "range": "y",
+    "enable": true,
+    "coverSheet": true,
+    "summary": true,
+    "users": [
+        "Schimke",
+        "Wurst"
+    ]
+}

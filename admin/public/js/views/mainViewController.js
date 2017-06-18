@@ -14,8 +14,8 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
         $scope.getUserList = function () {
             AuthService.getAllUsers().then(function (res) {
                 console.log(res);
-                $scope.userList = res;      $scope.credSavePossible = false;
-
+                $scope.userList = res;
+                $scope.credSavePossible = false;
             })
         };
 
@@ -50,11 +50,6 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
             })
         };
 
-        //TODO
-        $scope.getMapData = function (username, day) {
-            //wait till the api is ready
-        };
-
         $scope.openMapModal = function (username) {
             console.log(username);
             var modalInstance = $uibModal.open({
@@ -66,6 +61,27 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
                 resolve: {
                     username: function () {
                         return username
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (){
+                console.log("Done");
+            }, function () {
+            });
+        };
+
+        $scope.openPDFModal = function (user) {
+            console.log(user);
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: 'pdfGeneratorModal.html',
+                controller: 'pdfModalInstanceCtrl',
+                controllerAs: '$pdf',
+                size: "lg",
+                resolve: {
+                    user: function () {
+                        return user
                     }
                 }
             });
@@ -146,6 +162,73 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
     };
 
     $ctrl.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+});
+
+app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService, user) {
+    var $pdf = this;
+    $pdf.docData = {
+        username: user.username,
+        forename: user.forename,
+        receiveType: "saveOnClient",
+        coverSheet: true,
+        summary: true,
+        timeRange:{
+            range: null
+        }
+    };
+    $pdf.username = user.username;
+    $pdf.downloadable = false;
+    $pdf.errorMessage = "";
+    console.log($pdf.username);
+
+    $pdf.generatePDF = function () {
+        console.log($pdf.docData);
+        $pdf.errorMessage = "";
+        EventService.generatePDFFile($pdf.docData).then(function (response) {
+            console.log(response);
+            if($pdf.docData.receiveType === "saveOnClient") {
+                $pdf.downloadable = true;
+            }else{
+                $pdf.ok();
+            }
+        })
+    };
+
+    $pdf.datepicker = {
+        opened: false,
+        show: false
+    };
+
+    $pdf.rstBtn = function () {
+        $pdf.downloadable = false;
+    };
+
+    $pdf.timeRangeChanged = function () {
+        //reset button to generate if value changes
+        $pdf.rstBtn();
+        $pdf.datepicker.show = true;
+        $pdf.docData.timeRange.date = null;
+
+        switch ($pdf.docData.timeRange.range){
+            case "w":
+                $pdf.datepicker.format = "'Woche' w, MMMM yyyy";
+                break;
+            case "m":
+                $pdf.datepicker.format = "MMMM yyyy";
+                break;
+            case "y":
+                $pdf.datepicker.format = "yyyy";
+                break;
+        }
+    };
+
+    $pdf.ok = function () {
+        $uibModalInstance.close();
+    };
+
+    $pdf.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
 });

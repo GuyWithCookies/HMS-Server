@@ -1,0 +1,45 @@
+<navbar></navbar>
+<div class="col-xs-12 col-xs-offset-0 col-md-4 col-sm-offset-4" style="padding-bottom:3em;">
+    <h1>Einstellung für automatische E-Mails</h1>
+    <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
+    <div ng-show="successMessage" class="alert alert-success">{{successMessage}}</div>
+
+    <div class="well">
+        <span class="glyphicon glyphicon-info-sign"></span>
+        Hier kann eingestellt werden, ob und in welchen Abständen eine E-Mail mit
+        Arbeitszeitnachweisen verschickt werden soll.
+    </div>
+
+    <form class="form" ng-submit="saveSettings()">
+        <div class="form-group">
+            <label>Automatische E-Mails aktivieren</label>
+            <input type="checkbox" class="checkbox-inline"
+                   name="enable" ng-model="regMail.enable" required>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label>Einmal</label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="w">
+                pro Woche
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="m">
+                pro Monat
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="y">
+                pro Jahr
+            </label>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label>Empfänger E-Mail Addresse</label>
+            <input type="email" class="form-control" name="username" ng-model="regMail.email" required>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success pull-right" ng-disabled="disabled">speichern</button>
+        </div>
+    </form>
+</div>

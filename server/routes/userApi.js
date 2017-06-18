@@ -13,7 +13,7 @@ router.post('/register', function(req, res) {
             admin: req.body.admin
         }),
         req.body.password,
-        function(err, account) {
+        function(err) {
             if (err) {
                 console.log(err);
                 return res.status(500).json({
@@ -52,7 +52,6 @@ router.post('/adminLogin', function(req, res, next) {
                     });
                 }
                 if (docs.length > 0) {
-                    console.log(docs[0]);
                     if(docs[0].admin) {
                         return res.status(200).json({
                             status: "Login successful!"
@@ -121,7 +120,6 @@ router.get('/status', function(req, res) {
 
 router.get("/getCurrentUser", function(req, res) {
     console.log("Get Current User Request");
-    console.log(req.user);
     if (req.user !== null) {
         res.json(req.user);
     }else{
