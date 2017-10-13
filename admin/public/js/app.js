@@ -53,7 +53,7 @@ function ($routeProvider, $logProvider, calendarConfig, moment){
 
     // This will display all events on a month view even if they're not in the current month. Default false.
     calendarConfig.displayAllMonthEvents = true;
-    calendarConfig.showTimesOnWeekView = true;
+    calendarConfig.showTimesOnWeekView = false;
 }]);
 
 app.run(function ($rootScope, $location, $route, AuthService) {

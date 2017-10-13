@@ -1,15 +1,26 @@
 app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
-    'moment', '$uibModal',
-    function($scope, AuthService, EventService, moment, $uibModal) {
+    'moment', '$uibModal', "calendarConfig",
+    function($scope, AuthService, EventService, moment, $uibModal, calendarConfig) {
         $scope.userList = {};
 
         //calendar stuff
-        $scope.calendarView = 'week';
-
-        $scope.viewDate = new Date();
+        $scope.view = {};
+        $scope.view.viewDate = new Date();
+        $scope.view.calendarView = 'week';
 
         $scope.events = [];
 
+        $scope.formats = {
+            "day": "dd.MM.yyyy",
+            "week": "Woc'h'e ww, yyyy",
+            "month": "MMMM yyyy",
+            "year": "yyyy"
+        };
+        $scope.format = $scope.formats[$scope.view.calendarView];
+        $scope.$watch("view.calendarView", function(){
+            console.log("blb");
+           $scope.format = $scope.formats[$scope.view.calendarView];
+        });
         //functions
         $scope.getUserList = function () {
             AuthService.getAllUsers().then(function (res) {
@@ -21,11 +32,11 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
 
         //users...Array
         $scope.getEvents = function (username) {
-            var startMoment = moment($scope.viewDate);
+            var startMoment = moment($scope.view.viewDate);
             var queryData = {
                 username: username,
                 startsAt: startMoment.unix(),
-                endsAt: startMoment.add(1, $scope.calendarView).unix()
+                endsAt: startMoment.add(1, $scope.view.calendarView).unix()
             };
 
             EventService.getEvents(queryData).then(function (events) {
@@ -34,15 +45,9 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
                     events[i].startsAt = new Date(moment.unix(events[i].startsAt).toDate());
                     events[i].endsAt = new Date(moment.unix(events[i].endsAt).toDate());
                     if(events[i].type === 'break'){
-                        events[i]["color"] = { // can also be calendarConfig.colorTypes.warning for shortcuts to the deprecated event types
-                            primary: '#2a2c39', // the primary event color (should be darker than secondary)
-                            secondary: '#00f87b' // the secondary event color (should be lighter than primary)
-                        }
+                        events[i]["color"] = calendarConfig.colorTypes.important;
                     }else{
-                        events[i]["color"] = { // can also be calendarConfig.colorTypes.warning for shortcuts to the deprecated event types
-                            primary: '#000000', // the primary event color (should be darker than secondary)
-                            secondary: '#2a2c39' // the secondary event color (should be lighter than primary)
-                        }
+                        events[i]["color"] = calendarConfig.colorTypes.info
                     }
                 }
                 $scope.events = events;
@@ -50,8 +55,13 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
             })
         };
 
-        $scope.openMapModal = function (username) {
-            console.log(username);
+        $scope.eventClicked = function (event) {
+            console.log(event);
+            $scope.view.calendarView = "day";
+            $scope.view.viewDate = new Date(event.startsAt);
+        };
+
+        $scope.openMapModal = function (user) {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: 'map.html',
@@ -59,8 +69,8 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
                 controllerAs: '$ctrl',
                 size: "lg",
                 resolve: {
-                    username: function () {
-                        return username
+                    user: function () {
+                        return user
                     }
                 }
             });
@@ -97,13 +107,18 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
     }]);
 
 
-app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout, EventService, username) {
+app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout, EventService, user) {
     var $ctrl = this;
-    $ctrl.username = username;
+    $ctrl.username = user.username;
+    $ctrl.forename = user.forename;
     $ctrl.errorMessage = "";
     $ctrl.googleMapsUrl = "https://maps.googleapis.com/maps/api/js?key=AIzaSyCvU-yIIifuckW222Z2rZ82JkBy0-iBjZ4 ";
     console.log($ctrl.username);
-    $ctrl.map = null
+    $ctrl.map = null;
+    $ctrl.datepicker = {
+        opened: false,
+        date: new Date()
+    };
 
     //need to resize on every opening so we wont get a grey screen(bug)
     NgMap.getMap().then(function(map) {
@@ -140,7 +155,7 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
     };
 
 
-    //TODO
+    //TODO time for marker
     $ctrl.showTime = function(e, marker) {
         console.log("in ShowTime");
         $ctrl.clickedMarker = marker;
@@ -152,10 +167,7 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
         $ctrl.map.hideInfoWindow('iw');
     };
 
-    $ctrl.datepicker = {
-        opened: false,
-        date: moment()
-    };
+
 
     $ctrl.ok = function () {
         $uibModalInstance.close();
@@ -164,6 +176,9 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
     $ctrl.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
+
+    //get GPS of today at loading
+    $ctrl.getGpsPositions();
 });
 
 app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService, user) {
@@ -175,30 +190,39 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
         coverSheet: true,
         summary: true,
         timeRange:{
-            range: null
+            range: "w",
+            date: new Date()
         }
     };
     $pdf.username = user.username;
     $pdf.downloadable = false;
     $pdf.errorMessage = "";
+    $pdf.loadingPDF = false;
     console.log($pdf.username);
 
     $pdf.generatePDF = function () {
-        console.log($pdf.docData);
-        $pdf.errorMessage = "";
-        EventService.generatePDFFile($pdf.docData).then(function (response) {
-            console.log(response);
-            if($pdf.docData.receiveType === "saveOnClient") {
-                $pdf.downloadable = true;
-            }else{
-                $pdf.ok();
-            }
-        })
+        if($pdf.docData.timeRange.date !== "" && $pdf.docData.timeRange.date!==null) {
+            console.log($pdf.docData);
+            $pdf.loadingPDF = true;
+            $pdf.errorMessage = "";
+            EventService.generatePDFFile($pdf.docData).then(function (response) {
+                console.log(response);
+                $pdf.loadingPDF = false;
+                if ($pdf.docData.receiveType === "saveOnClient") {
+                    $pdf.downloadable = true;
+                } else {
+                    $pdf.ok();
+                }
+            })
+        }else{
+            $pdf.errorMessage = "Das Datumsfeld darf nicht leer sein! Bitte wähle einen Zeitraum."
+            $pdf.loadingPDF = false;
+        }
     };
 
     $pdf.datepicker = {
         opened: false,
-        show: false
+        show: true
     };
 
     $pdf.rstBtn = function () {
@@ -209,7 +233,6 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
         //reset button to generate if value changes
         $pdf.rstBtn();
         $pdf.datepicker.show = true;
-        $pdf.docData.timeRange.date = null;
 
         switch ($pdf.docData.timeRange.range){
             case "w":
@@ -231,4 +254,6 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
     $pdf.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
+
+    $pdf.timeRangeChanged();
 });

@@ -17,12 +17,6 @@
           ng-bind="month.label">
         </span>
 
-        <small
-          class="cal-events-num badge badge-important pull-left"
-          ng-show="month.badgeTotal > 0"
-          ng-bind="month.badgeTotal">
-        </small>
-
         <div
           class="cal-day-tick"
           ng-show="monthIndex === vm.openMonthIndex && (vm.cellAutoOpenDisabled || vm.view[vm.openMonthIndex].events.length > 0) && !vm.slideBoxDisabled">

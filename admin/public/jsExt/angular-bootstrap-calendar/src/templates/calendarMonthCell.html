@@ -17,12 +17,6 @@
     'cal-day-open': dayIndex === vm.openDayIndex
   }">
 
-  <small
-    class="cal-events-num badge badge-important pull-left"
-    ng-show="day.badgeTotal > 0 && (vm.calendarConfig.displayAllMonthEvents || day.inMonth)"
-    ng-bind="day.badgeTotal">
-  </small>
-
   <span
     class="pull-right"
     data-cal-date

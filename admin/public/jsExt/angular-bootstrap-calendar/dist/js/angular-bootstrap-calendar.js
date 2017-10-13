@@ -3505,7 +3505,7 @@ angular
     }
 
     function weekViewTooltip(event) {
-      return event.title;
+      return "hallo";
     }
 
     function dayView(event) {

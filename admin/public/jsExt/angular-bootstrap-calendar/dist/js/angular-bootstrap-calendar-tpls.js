@@ -3591,7 +3591,8 @@ angular
     }
 
     function weekViewTooltip(event) {
-      return event.title;
+        return "Beginn: "+moment(event.startsAt).format("HH:mm U[h]r")+"\nEnde: "+moment(event.endsAt).format("HH:mm U[h]r");
+
     }
 
     function dayView(event) {
@@ -3599,7 +3600,7 @@ angular
     }
 
     function dayViewTooltip(event) {
-      return event.title;
+      return "";
     }
 
     return {

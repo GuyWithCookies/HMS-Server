@@ -18,7 +18,8 @@ moment.locale('de');
 var pdfGenerator = {
     generatePDF: function (docDefinition, fileName) {
         var pdfDoc = printer.createPdfKitDocument(docDefinition);
-        var filePath = "../admin/public/pdf/"+fileName || "../admin/public/pdf/Arbeitszeitnachweis.pdf";
+        var file = fileName || "Arbeitszeitnachweis.pdf";
+        var filePath = "../admin/public/pdf/"+file;
 
         fs.closeSync(fs.openSync(filePath, 'w'));
 
@@ -112,8 +113,10 @@ var pdfGenerator = {
 
         for (var event in docData.events){
             if (docData.events.hasOwnProperty(event)) {
+                //workaround --> "m" not recognized by moment
+                var range = docData.timeRange.range==="m"?"month":docData.timeRange.range;
                 if(!moment(docData.events[event].startsAt*1000)
-                        .isSame(docData.timeRange.date, docData.timeRange.range)){
+                        .isSame(docData.timeRange.date, range)){
                     continue;
                 }
                 var week = moment(docData.events[event].startsAt*1000).week();
@@ -141,10 +144,10 @@ var pdfGenerator = {
             }
         }
 
-        var summaryData = {};
-
         //Generate 1 Table for every Week
+        var summaryData = {};
         for(week=count.startWeek; week<count.weeks+count.startWeek; week++) {
+
             if(!sortedEvents.hasOwnProperty(week)){
                 continue;
             }
@@ -163,6 +166,7 @@ var pdfGenerator = {
                 });
             }
 
+
             var body = [
                 //HeaderColumns
                 [
@@ -176,7 +180,6 @@ var pdfGenerator = {
                     {text: 'Pause', style: 'tableHeader', alignment: 'center'},
                     {text: 'GesamtStd', style: 'tableHeader', alignment: 'center'}]
             ];
-
             for(var day in sortedEvents[week]){
                 if(sortedEvents[week].hasOwnProperty(day)){
                     var day = sortedEvents[week][day];
@@ -266,10 +269,12 @@ var pdfGenerator = {
                             ])
                         }
 
-                        //TODO
-                        summaryData[year].workSum.days ++;
-                        summaryData[year][month].workSum.days ++;
+                        //TODO wenn minutenüberlauf Stunde hochzählen
                     }
+
+                    summaryData[year].workSum.days ++;
+                    summaryData[year][month].workSum.days ++;
+
                     //push the sum of pause and workinghours
                     body.push([
                         '',
@@ -279,8 +284,8 @@ var pdfGenerator = {
                         '',
                         '',
                         '',
-                        {text:moment(pause).format("H:mm"), style:"center"},
-                        {text:moment(workSum).format("H:mm"), style:"center"}
+                        {text:moment().hours(pause.hours).minutes(pause.minutes).format("H:mm"), style:"center"},
+                        {text:moment().hours(workSum.hours).minutes(workSum.minutes).format("H:mm"), style:"center"}
                     ])
                 }
             }
@@ -306,14 +311,12 @@ var pdfGenerator = {
                 case "m":
                 case "y":
                     content.push({
-                        //TODO Besserer Name
                         text: "Zusammenfassung",
                         style: ["header", "center"]
                     });
-
                     if(Object.keys(summaryData).length>0) {
                         summaryContent.push([
-                            {text:"Monat", style: 'tableHeader', alignment: 'center'},
+                            {text:"Monat|Jahr", style: 'tableHeader', alignment: 'center'},
                             {text:"Gesamtarbeitszeit", style: 'tableHeader', alignment: 'center'},
                             {text:"Gesamtpausenzeit", style: 'tableHeader', alignment: 'center'},
                             {text:"Arbeitstage", style: 'tableHeader', alignment: 'center'}
@@ -334,6 +337,10 @@ var pdfGenerator = {
                                             if (!(m === "workSum" || m === "pauseSum")) {
                                                 //short reference for the month object
                                                 var mShort = summaryData[y][m];
+                                                mShort.workSum.hours += Math.floor(mShort.workSum.minutes/60);
+                                                mShort.workSum.minutes = mShort.workSum.minutes % 60;
+                                                mShort.pauseSum.hours += Math.floor(mShort.pauseSum.minutes/60);
+                                                mShort.pauseSum.minutes = mShort.pauseSum.minutes % 60;
                                                 summaryContent.push([
                                                     {text:m, style:"center"},
                                                     {
@@ -360,18 +367,22 @@ var pdfGenerator = {
                                 }
 
                                 //Gesamtjahr
+                                summaryData[y].workSum.hours += Math.floor(summaryData[y].workSum.minutes/60);
+                                summaryData[y].workSum.minutes = summaryData[y].workSum.minutes % 60;
+                                summaryData[y].pauseSum.hours += Math.floor(summaryData[y].pauseSum.minutes/60);
+                                summaryData[y].pauseSum.minutes = summaryData[y].pauseSum.minutes % 60;
                                 summaryContent.push([
                                     {text: y+" Gesamt", style:"center"},
                                     {
                                         text: (summaryData[y].workSum.hours)+
                                         ":" +
-                                        ("00"+summaryData[y].workSum.minutes % 60).substr(-2),
+                                        ("00"+summaryData[y].workSum.minutes).substr(-2),
                                         style:"center"
                                     },
                                     {
                                         text: (summaryData[y].pauseSum.hours)+
                                         ":" +
-                                        ("00"+summaryData[y].pauseSum.minutes % 60).substr(-2),
+                                        ("00"+summaryData[y].pauseSum.minutes).substr(-2),
                                         style:"center"
                                     },
                                     {

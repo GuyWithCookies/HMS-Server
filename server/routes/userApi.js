@@ -53,6 +53,7 @@ router.post('/adminLogin', function(req, res, next) {
                 }
                 if (docs.length > 0) {
                     if(docs[0].admin) {
+                        console.log("Login successfull");
                         return res.status(200).json({
                             status: "Login successful!"
                         })
@@ -86,14 +87,14 @@ router.post('/login', function(req, res, next) {
         }
         req.logIn(user, function(err) {
             if (err) {
-                console.warn("Login error for user "+user);
+                console.warn("Login error for user "+user.username);
                 console.warn(err);
                 return res.status(500).json({
                     err: 'Fehler beim Einloggen'
                 });
             }
-            console.log("Login successful for User:"+user);
-            res.status(200).json({
+            console.log("Login successful for User:"+user.username);
+            return res.status(200).json({
                 status: 'Login successful!'
             });
         });
@@ -107,19 +108,41 @@ router.get('/logout', function(req, res) {
     });
 });
 
-router.get('/status', function(req, res) {
-    if (!req.isAuthenticated()) {
-        return res.status(200).json({
-            status: false
+router.post('/status', function(req, res) {
+    if(req.user) {
+        console.log("User authenticated");
+        res.status(200).json({
+            status: true
+        });
+    }else {
+        console.log("User not authenticated");
+        return res.status(401).json({
+            error: 'User not authenticated'
         });
     }
-    res.status(200).json({
-        status: true
-    });
+
+
+});
+
+router.get('/status', function(req, res) {
+    if(req.user) {
+        console.log("User authenticated");
+        res.status(200).json({
+            status: true
+        });
+    }else {
+        console.log("User not authenticated");
+        return res.status(401).json({
+            error: 'User not authenticated'
+        });
+    }
+
+
 });
 
 router.get("/getCurrentUser", function(req, res) {
-    console.log("Get Current User Request");
+    console.log(req);
+    console.log("Get Current User Request. Send "+req.user);
     if (req.user !== null) {
         res.json(req.user);
     }else{
@@ -160,7 +183,7 @@ router.post("/saveUserData", function(req, res) {
         if (err) {
             res.json({
                 status: "ERROR",
-                msg: errs
+                msg: err
             });
         }
         if (docs.length > 0) {
@@ -202,7 +225,7 @@ router.get("/getUserData/:name", function(req, res) {
 });
 
 router.post("/sendEmail", function (req, res) {
-
+    //TODO
 });
 
 

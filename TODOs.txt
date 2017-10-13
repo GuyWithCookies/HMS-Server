@@ -1,14 +1,6 @@
 ServerAdminBereich:
 Test Map with real gps data (remove position randomization)
-Implement time view on markers in map
-implement forename in map
-improve ux for downloading pdf local(just send when timerange is set)
-bei gesamtstunden --> abgeschnitten wenn mehr als 2 Stellen
-bei gesamtminuten --> mod 60 und dann stunden hinzufügen
-table 100% width
-new colors for calendar
-calendar stretch event to endtime
-pdf in neuem tab
+
 add regular email sending
 one email with zip for regular email sending
 add user selection to emailsettings
@@ -20,6 +12,7 @@ FIX: zip kills pdf format
 
 
 stresstest database --> pdf generierung
+stresstest database --> loading many events to phone (--> maybe limit count
 
 
 
