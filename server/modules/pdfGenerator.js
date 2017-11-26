@@ -115,6 +115,7 @@ var pdfGenerator = {
             if (docData.events.hasOwnProperty(event)) {
                 //workaround --> "m" not recognized by moment
                 var range = docData.timeRange.range==="m"?"month":docData.timeRange.range;
+                    //range = docData.timeRange.range==="w"?"week":docData.timeRange.range;
                 if(!moment(docData.events[event].startsAt*1000)
                         .isSame(docData.timeRange.date, range)){
                     continue;
@@ -180,6 +181,26 @@ var pdfGenerator = {
                     {text: 'Pause', style: 'tableHeader', alignment: 'center'},
                     {text: 'GesamtStd', style: 'tableHeader', alignment: 'center'}]
             ];
+
+            function ReverseObject(Obj){
+                var reversed = {};
+                var tempKey = [];
+                var tempVal = [];
+
+                for (var key in Obj){
+                    if(Obj.hasOwnProperty(key)) {
+                        tempKey.push(key);
+                        tempVal.push(Obj[key]);
+                    }
+                }
+                for (var i = tempKey.length-1; i >= 0; i--){
+                    reversed[tempKey[i]] = tempVal[i];
+                }
+                return reversed;
+            }
+
+            sortedEvents[week] = ReverseObject(sortedEvents[week]);
+
             for(var day in sortedEvents[week]){
                 if(sortedEvents[week].hasOwnProperty(day)){
                     var day = sortedEvents[week][day];
@@ -197,9 +218,8 @@ var pdfGenerator = {
                         if(day.hasOwnProperty(event)){
                             var ev = day[event];
                             var diff =  moment((ev.endsAt-ev.startsAt)*1000).subtract(1, "hour");
-                            weekday = firstDay ? {text:moment(ev.startsAt*1000).format("dddd"),
-                                rowSpan: Object.keys(day).length}:'';
-
+                            weekday = firstDay ? {text:moment(ev.startsAt*1000).format("dddd")}:'';
+                            //TODO Fix RowSpan Bug --> Right now just workaround (rowSpan: Object.keys(day).length-1 )
                             firstDay = false;
 
                             //add some summarycalculations
@@ -268,8 +288,6 @@ var pdfGenerator = {
                                 ''
                             ])
                         }
-
-                        //TODO wenn minutenüberlauf Stunde hochzählen
                     }
 
                     summaryData[year].workSum.days ++;

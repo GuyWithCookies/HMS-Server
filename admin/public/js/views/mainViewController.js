@@ -215,7 +215,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
                 }
             })
         }else{
-            $pdf.errorMessage = "Das Datumsfeld darf nicht leer sein! Bitte wähle einen Zeitraum."
+            $pdf.errorMessage = "Das Datumsfeld darf nicht leer sein! Bitte wähle einen Zeitraum.";
             $pdf.loadingPDF = false;
         }
     };
@@ -236,7 +236,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
 
         switch ($pdf.docData.timeRange.range){
             case "w":
-                $pdf.datepicker.format = "'Woche' w, MMMM yyyy";
+                $pdf.datepicker.format = "W w, MMMM yyyy";
                 break;
             case "m":
                 $pdf.datepicker.format = "MMMM yyyy";

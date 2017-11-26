@@ -1,3 +1,9 @@
 node_modules/
 .idea/
 bower_components/
+
+admin/public/css/bower\.css
+
+admin/public/jsExt/bower\.js
+
+admin/public/pdf/
