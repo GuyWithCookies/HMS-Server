@@ -1,7 +1,7 @@
 app.controller('loginViewController', ['$scope', '$location', 'AuthService', function ($scope, $location, AuthService) {
     $scope.cred = {};
 
-    $scope.login = function () {
+    $scope.loginFkt = function () {
 
       // initial values
       $scope.error = false;

@@ -13,6 +13,7 @@ app.factory('AuthService', ['$q', '$timeout', '$http', function($q, $timeout, $h
         getCurrentUser: getCurrentUser,
         getUserData: getUserData,
         saveUserData: saveUserData,
+        removeUser: removeUser,
         sendEmail: sendEmail,
         getAllUsers: getAllUsers
     });
@@ -181,6 +182,33 @@ app.factory('AuthService', ['$q', '$timeout', '$http', function($q, $timeout, $h
                     deferred.resolve();
                 } else {
                     deferred.reject("Something went wrong");
+                }
+            })
+            // handle error
+            .error(function(data) {
+                deferred.reject(data);
+            });
+
+        // return promise object
+        return deferred.promise;
+    }
+
+    /**
+     * Sends request to remove the particular user from the database
+     * @param name
+     */
+    function removeUser(name) {
+        // create a new instance of deferred
+        var deferred = $q.defer();
+        console.log("Username to remove:"+name);
+        // send a post request to the server
+        $http.get('/user/removeUser/'+name)
+        // handle success
+            .success(function(data, status) {
+                if (status === 200) {
+                    deferred.resolve();
+                } else {
+                    deferred.reject(data);
                 }
             })
             // handle error

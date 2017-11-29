@@ -178,7 +178,7 @@ router.get("/getAllUsers", function(req, res) {
 router.post("/saveUserData", function(req, res) {
     var data = req.body.userdata;
     User.find({
-        "username": data.username
+        "username": data.oldUsername
     }, function(err, docs) {
         if (err) {
             res.json({
@@ -188,14 +188,69 @@ router.post("/saveUserData", function(req, res) {
         }
         if (docs.length > 0) {
             for(var key in data){
-                if(data.hasOwnProperty(key)) {
-                    docs[0][key] = data[key]
+                if(!key.indexOf("Password")>-1 && !key.indexOf("old")>-1) {
+                    if (data.hasOwnProperty(key) && data[key]!==null) {
+                        docs[0][key] = data[key]
+                    }
                 }
             }
-            docs[0].save();
-            res.json({status:"OK"});
+            //change Password
+            if(data["oldPassword"] !== data["newPassword"] && data["oldPassword"] !== null
+            && data["newPassword"] !== null){
+                docs[0].changePassword(data["oldPassword"], data["newPassword"], function (err) {
+                    if (err) {
+                        console.log(err);
+                        res.json({
+                            status: "ERROR",
+                            msg: err
+                        });
+                    }else {
+                        console.log(docs[0]);
+                        docs[0].save();
+                        res.json({status:"OK"});
+                    }
+                });
+            }else{
+                docs[0].save();
+                res.json({status:"OK"});
+            }
+        } else {
+            console.log("Cant find user "+data.oldUsername);
+        }
+    })
+});
+
+/**
+ * remove User from the database
+ * @param name
+ */
+router.get("/removeUser/:name", function (req, res) {
+    var name = req.params.name;
+    console.log("Remove user:"+name);
+    User.find({
+        "username": name
+    }, function(err, docs) {
+        if (err) {
+            console.log(err);
+            res.status(500);
+            res.json({
+                status: "ERROR",
+                msg: errs
+            });
+        }
+        if (docs.length > 0) {
+            console.log("Found User and remove him");
+            docs[0].remove();
+            res.json({
+                status: "OK"
+            })
         } else {
             console.log("Cant find user "+name);
+            res.status(404);
+            res.json({
+                status: "ERROR",
+                msg: "Dieser Mitarbeiter existiert nicht!"
+            });
         }
     })
 });

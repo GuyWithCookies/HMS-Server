@@ -63,12 +63,19 @@
                                       uib-tooltip="Erstelle einen Zeitplan als PDF zum Download oder als E-Mail
                                       (Woche, Monat, Jahr)"
                                       ng-click="openPDFModal(user)"
-                                      tooltip-popup-delay="1000"></span>
+                                      tooltip-popup-delay="1000">
+                                </span>
                                 <span class="glyphicon glyphicon-map-marker pull-right"
                                       uib-tooltip="Zeige die Positionen auf der Karte an"
                                       tooltip-popup-delay="1000"
                                       style="margin-right: 10px;"
-                                      ng-click="openMapModal(user)"></span>
+                                      ng-click="openMapModal(user)">
+                                </span>
+                                <span class="pull-right glyphicon glyphicon-cog"
+                                      uib-tooltip="Ändere/Lösche die Mitarbeiterdaten."
+                                      ng-click="openChangeUserModal(user)"
+                                      tooltip-popup-delay="1000">
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -369,5 +376,82 @@
         </div>
 
     </div>
-
 </script>
+
+<script type="text/ng-template" id="changeUserModal.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="cuModalTitle">
+            Ändere Daten für {{$cuModal.user.forename}} {{$cuModal.username}}
+        </h3>
+    </div>
+    <div class="modal-body col-sm-12" id="cuModal">
+        <form class="form-horizontal col-sm-8 col-sm-offset-2">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="forename">Vorname:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="forename" ng-model="$cuModal.newUserData.forename">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="forename">Nachname:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="surname" ng-model="$cuModal.newUserData.surname"
+                           ng-change="$cuModal.newUserData.username=$cuModal.newUserData.surname">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label><input type="checkbox" ng-model="$cuModal.newUserData.admin  ">Administratorzugang</label>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="pwd">Aktuelles Passwort:</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="oldPwd" ng-model="$cuModal.newUserData.oldPassword"
+                           placeholder="Aktuelles Passwort">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="pwd">Neues Passwort:</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="newPwd" ng-model="$cuModal.newUserData.newPassword"
+                           placeholder="Neues Passwort">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="pwd">Bestätige neues Password:</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="pwd" ng-model="$cuModal.newPasswordCheck"
+                           placeholder="Neues Passwort">
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div class="btn btn-sm btn-danger glyphicon glyphicon-trash pull-left" ng-click="$cuModal.removeUser()"></div>
+        <div class="alert alert-warning" ng-show="$cuModal.errorMessage!==''">
+            <span class="glyphicon glyphicon-info-sign"></span> {{$cuModal.errorMessage}}</div>
+
+        <button class="btn btn-primary pull-right" type="button" ng-click="$cuModal.updateUserdata()">Speichern</button>
+        <button class="btn btn-danger pull-right" type="button" ng-click="$cuModal.ok()">Abbrechen</button>
+
+        <div class="sk-fading-circle" ng-show="$cuModal.loading">
+            <div class="sk-circle1 sk-circle"></div>
+            <div class="sk-circle2 sk-circle"></div>
+            <div class="sk-circle3 sk-circle"></div>
+            <div class="sk-circle4 sk-circle"></div>
+            <div class="sk-circle5 sk-circle"></div>
+            <div class="sk-circle6 sk-circle"></div>
+            <div class="sk-circle7 sk-circle"></div>
+            <div class="sk-circle8 sk-circle"></div>
+            <div class="sk-circle9 sk-circle"></div>
+            <div class="sk-circle10 sk-circle"></div>
+            <div class="sk-circle11 sk-circle"></div>
+            <div class="sk-circle12 sk-circle"></div>
+        </div>
+    </div>
+</script>
+

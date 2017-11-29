@@ -102,6 +102,28 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
             });
         };
 
+        $scope.openChangeUserModal = function (user) {
+            console.log(user);
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: 'changeUserModal.html',
+                controller: 'changeUserModalInstanceCtrl',
+                controllerAs: '$cuModal',
+                size: "lg",
+                resolve: {
+                    user: function () {
+                        return user
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (){
+                console.log("Done");
+                $scope.getUserList();
+            }, function () {
+            });
+        };
+
         //start
         $scope.getUserList();
     }]);
@@ -256,4 +278,67 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
     };
 
     $pdf.timeRangeChanged();
+});
+
+app.controller('changeUserModalInstanceCtrl', function ($uibModalInstance, AuthService, user) {
+    var $cuModal = this;
+    console.log(user);
+    $cuModal.user = user;
+    $cuModal.username = user.username;
+    $cuModal.newUserData ={
+        oldUsername: user.username,
+        username: user.username,
+        forename: user.forename,
+        surname: user.surname,
+        admin: user.admin,
+        oldPassword: null,
+        newPassword: null
+    };
+
+    $cuModal.errorMessage = "";
+    $cuModal.newPasswordCheck = null;
+    $cuModal.loading = false;
+
+    $cuModal.removeUser = function () {
+        if(confirm("Möchtest du den Mitarbeiter wirklich löschen? Das kann nicht rückgängig gemacht werden!")) {
+            $cuModal.loading = true;
+            AuthService.removeUser($cuModal.username).then(function (response) {
+                console.log(response);
+                $cuModal.loading = false;
+                $cuModal.ok();
+            }, function (response) {
+                $cuModal.loading = false;
+                $cuModal.errorMessage = response.data.msg;
+            })
+        }
+    };
+
+    $cuModal.updateUserdata = function () {
+        if($cuModal.newPasswordCheck === $cuModal.newUserData.newPassword) {
+            $cuModal.loading = true;
+            AuthService.saveUserData($cuModal.newUserData).then(function (response) {
+                console.log(response);
+                $cuModal.loading = false;
+                $cuModal.ok();
+            }, function (response) {
+                $cuModal.loading = false;
+                if(response) {
+                    $cuModal.errorMessage = response.data.msg;
+                }else {
+                    $cuModal.errorMessage = "Irgendwas ist schief gelaufen! Bitte melde dich bei Benni."
+                }
+            })
+        }else {
+            $cuModal.errorMessage = "Die neuen Passwörter stimmen nicht überein!"
+        }
+    };
+
+    $cuModal.ok = function () {
+        $uibModalInstance.close();
+    };
+
+    $cuModal.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+
 });
