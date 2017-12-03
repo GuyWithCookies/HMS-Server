@@ -1,9 +1,9 @@
 var fonts = {
     Roboto: {
-        normal: 'server/fonts/Roboto-Regular.ttf',
-        bold: 'server/fonts/Roboto-Medium.ttf',
-        italics: 'server/fonts/Roboto-Italic.ttf',
-        bolditalics: 'server/fonts/Roboto-MediumItalic.ttf'
+        normal: '../server/fonts/Roboto-Regular.ttf',
+        bold: '../server/fonts/Roboto-Medium.ttf',
+        italics: '../server/fonts/Roboto-Italic.ttf',
+        bolditalics: '../server/fonts/Roboto-MediumItalic.ttf'
     }
 };
 
@@ -16,11 +16,11 @@ moment.locale('de');
 
 
 var pdfGenerator = {
-    generatePDF: function (docDefinition, fileName) {
+    generatePDF: function (docDefinition, fileName, cb) {
         var pdfDoc = printer.createPdfKitDocument(docDefinition);
         var file = fileName || "Arbeitszeitnachweis.pdf";
         var filePath = "../admin/public/pdf/"+file;
-
+        console.log(fileName);
         fs.closeSync(fs.openSync(filePath, 'w'));
 
         var stream = fs.createWriteStream(filePath);
@@ -29,6 +29,12 @@ var pdfGenerator = {
             console.log(err);
         });
         pdfDoc.end();
+        stream.on('finish', function () {
+            // call the callback function or in my case resolve the Promise.
+            if(typeof cb === 'function'){
+                cb(fileName);
+            }
+        });
     },
 
     generateContent: function (docData) {

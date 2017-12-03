@@ -5,17 +5,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var mongoose = require('mongoose');
-var hash = require('bcrypt-nodejs');
 var path = require('path');
 var passport = require('passport');
 var localStrategy = require('passport-local' ).Strategy;
-
+var mailSender = require("./modules/mailSender");
 
 var connection_string = 'mongodb://localhost/hmsg';
-// if OPENSHIFT env variables are present, use the available connection info:
-if(process.env.OPENSHIFT_MONGODB_DB_URL){
-    connection_string = process.env.OPENSHIFT_MONGODB_DB_URL+process.env.OPENSHIFT_APP_NAME;
-}
 
 mongoose.connect(connection_string);
 
@@ -45,7 +40,6 @@ var allowCrossDomain = function(req, res, next) {
 app.use(express.static(path.join(__dirname, '../admin/public')));
 app.use(bodyParser.json());
 //SEO Optimation
-app.use(require('prerender-node').set('prerenderToken', 'VR1ZTJCYUfwQfCq27BRn'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(require('express-session')({
@@ -63,6 +57,21 @@ app.use(passport.session());
 passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+//Timer for regMailing
+function regMailCheck() {
+    if (mailSender.isMailingTime()) {
+        console.log("Send Reg Mail");
+        mailSender.sendRegMail();
+        console.log("Save next Time");
+        mailSender.calculateNextMailingTime();
+    }
+    setTimeout(function () {
+        regMailCheck();
+    }, 60000);
+}
+
+regMailCheck();
 
 // routes
 app.use('/user/', userRoutes);

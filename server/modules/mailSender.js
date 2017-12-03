@@ -1,6 +1,7 @@
 var fs = require('fs');
 var moment = require('moment');
 var nodemailer = require("nodemailer");
+var sgTransport = require("nodemailer-sendgrid-transport");
 var zipFolder = require("zip-folder");
 var rimraf = require("rimraf");
 
@@ -12,28 +13,27 @@ var pdfGenerator = require('../modules/pdfGenerator.js');
 
 moment.locale('de');
 
-
-var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    port: 465,
-    secure: true, // secure:true for port 465, secure:false for port 587
+var options = {
     auth: {
-        user: 'benjamin.schimke95@gmail.com',
-        pass: '@Benjamin!1'
+        api_user: 'HMSSender',
+        api_key: 'Benjamin!1'
     }
-});
+
+};
+
+var transporter = nodemailer.createTransport(sgTransport(options));
 
 var MailSender =  {
     sendSingleMail: function (data, cb) {
         //continue with sending reg mail
         var mailOptions = {
-            from: 'bot@bot.com',
+            from: 'arbeitszeit@hms-guenther.com',
             to: data.email,
-            //TODO add timedescription
             subject: 'Arbeitszeitnachweis für '+data.forename+" "+data.username,
-            html: '<p>Arbeitszeitnachweis für '+data.forename+' '+data.username+'</p>',
+            html: '<h1>Arbeitszeitnachweis für '+data.forename+' '+data.username+'</h1>' +
+            '<p>Öffne den Anhang um den Arbeitszeitnachweis herunterzuladen!</p>',
             attachments: [{
-                filename: 'Arbeitszeitnachweis_'+data.forename+"_"+data.username,
+                filename: 'Arbeitszeitnachweis_'+data.forename+"_"+data.username+".pdf",
                 path: '../admin/public/pdf/Arbeitszeitnachweis.pdf',
                 contentType: 'application/pdf'
             }]
@@ -43,7 +43,7 @@ var MailSender =  {
             if (error) {
                 console.log(error);
             } else {
-                console.log('Email sent: ' + info.response);
+                console.log('Email sent');
                 cb()
             }
         });
@@ -51,16 +51,18 @@ var MailSender =  {
 
     sendRegMail: function () {
         this.generateUserDataArchiv(function () {
+            var dateString = moment().format(MailSender.getDateFormat(emailSettings.range));
             var mailOptions = {
-                from: 'bot@bot.com',
+                from: 'HMSG_Sekretaer_Benni',
                 to: emailSettings.email,
                 //TODO add timedescription
-                subject: 'Arbeitszeitnachweise',
-                html: '<h1>Arbeitszeitnachweise</h1>',
+                subject: 'Arbeitszeitnachweise für '+dateString,
+                html: '<h1>Arbeitszeitnachweise</h1><p>Im Anhang befinden sich die Arbeitszeitnachweise für '+dateString+'</p><br>' +
+                '<p>Viele Grüße und einen schönen Tag,</p>' +
+                '<p><small>HMSG Sekretär Benni :-) </small></p>',
                 attachments: [{
-                    filename: 'Arbeitszeitnachweise',
-                    path: '../admin/public/pdf/Arbeitszeitnachweise.zip',
-                    contentType: 'application/zip'
+                    filename: 'Arbeitszeitnachweise_'+dateString+'.zip',
+                    path: '../admin/public/pdf/Arbeitszeitnachweise.zip'
                 }]
             };
 
@@ -68,7 +70,7 @@ var MailSender =  {
                 if (error) {
                     console.log(error);
                 } else {
-                    console.log('Email sent: ' + info.response);
+                    console.log('Email sent');
                 }
             });
         });
@@ -95,7 +97,7 @@ var MailSender =  {
                             console.log(err);
                             return;
                         }
-
+                        //TODO Error if user doesnt exists
                         var userdata = usersData[0];
                         console.log(userdata);
                         Event.find({
@@ -162,27 +164,102 @@ var MailSender =  {
                             };
 
                             //saves generated pdf to temp/report.pdf
-                            pdfGenerator.generatePDF(definition, "Arbeitszeitnachweise/"+docData.username+".pdf");
-
-                            console.log("Done");
-                            donePDFs++;
-                            if(donePDFs===users.length){
-                                zipFolder('../admin/public/pdf/Arbeitszeitnachweise', '../admin/public/pdf/Arbeitszeitnachweise.zip', function(err) {
-                                    if(err) {
-                                        console.log('oh no!', err);
-                                    } else {
-                                        console.log('EXCELLENT');
-                                        cb();
-                                    }
-                                });
-                            }
+                            pdfGenerator.generatePDF(definition, "Arbeitszeitnachweise/"+docData.username+".pdf", function () {
+                                console.log("Done");
+                                donePDFs++;
+                                if(donePDFs===users.length){
+                                    zipFolder('../admin/public/pdf/Arbeitszeitnachweise', '../admin/public/pdf/Arbeitszeitnachweise.zip', function(err) {
+                                        if(err) {
+                                            console.log('oh no!', err);
+                                        } else {
+                                            console.log('EXCELLENT');
+                                            cb();
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
                 }
             }
         });
+    },
 
+    /**
+     * select a dateFormat String according to the set range
+     * @param range y, m or w
+     */
+    getDateFormat: function (range) {
+        if(range==="y"){
+            return "YYYY";
+        }else if(range === "m"){
+            return "MMMM_YYYY"
+        }else if(range==="w"){
+            return "[Woche]_W_YYYY";
+        }else{
+            return "";
+        }
+    },
 
+    /**
+     * Checks if its time again to send the regular Mails
+     * @returns {boolean}
+     */
+    isMailingTime: function () {
+        delete require.cache[require.resolve('../settings/emailSettings.json')];
+        emailSettings = require('../settings/emailSettings.json');
+
+        var enabled = emailSettings.enable;
+        var datetime = this.getTimeFromSettings();
+        return (datetime.isSame(moment(), "minute") && enabled);
+    },
+
+    /**
+     * calculates when the next time for an regmail sending occours.
+     * Depends on the settings in emailSetting.json
+     * @returns {*}
+     */
+    calculateNextMailingTime: function(){
+        delete require.cache[require.resolve('../settings/emailSettings.json')];
+        emailSettings = require('../settings/emailSettings.json');
+        var datetime = this.getTimeFromSettings();
+        var nextTime = null;
+
+        switch (emailSettings.range){
+            case "w":
+                nextTime =  datetime.add(1, "week");
+                break;
+            case "m":
+                nextTime = datetime.add(1, "month");
+                break;
+            case "d":
+                nextTime = datetime.add(1, "year");
+                break;
+            default:
+                return null;
+        }
+
+        emailSettings.sendDate.date = moment(nextTime).toISOString();
+        emailSettings.sendDate.time = moment(nextTime).toISOString();
+        fs.writeFile('settings/emailSettings.json', JSON.stringify(emailSettings, null, 4), function (err) {
+            if (err) throw err;
+            console.log('The SettingsObj has been updated!');
+        });
+    },
+
+    getTimeFromSettings: function () {
+        delete require.cache[require.resolve('../settings/emailSettings.json')];
+
+        var dateSettings = require('../settings/emailSettings.json').sendDate;
+        var date = moment(dateSettings.date);
+        var time = moment(dateSettings.time);
+
+        return moment()
+            .set("year", date.get("year"))
+            .set("month", date.get("month"))
+            .set("day", date.get("day"))
+            .set("hour", time.get("hour"))
+            .set("minute", time.get("minute"));
     }
 };
 

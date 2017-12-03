@@ -251,8 +251,8 @@ router.post("/getGpsPositions", function (req, res) {
         for(var i=0; i<docs.length; i++) {
             if (moment(docs[i].time*1000).isSame(date, "day")) {
                 matchedPositions.push({
-                    pos:[parseFloat(docs[i].latitude)+ (Math.random()/10),
-                        parseFloat(docs[i].longitude)+ (Math.random()/10)],
+                    pos:[parseFloat(docs[i].latitude),
+                        parseFloat(docs[i].longitude)],
                     time:docs[i].time
                 });
             }
@@ -328,21 +328,21 @@ router.post("/generatePDFFile", function (req, res) {
         };
 
         //saves generated pdf to temp/report.pdf
-        pdfGenerator.generatePDF(definition);
-
-        if (docData.receiveType === "email") {
-            //send mail
-            mailSender.sendSingleMail(docData, function () {
+        pdfGenerator.generatePDF(definition, null, function () {
+            if (docData.receiveType === "email") {
+                //send mail
+                mailSender.sendSingleMail(docData, function () {
+                    res.json({status: "ok"});
+                });
+            } else if (docData.receiveType === "saveOnClient") {
+                //send pdf back to client
                 res.json({status: "ok"});
-            });
-        } else if (docData.receiveType === "saveOnClient") {
-            //send pdf back to client
-            res.json({status: "ok"});
-        } else {
-            console.log("no receiveType specified");
-            console.log(docData.receiveType);
-        }
-        console.log("Done");
+            } else {
+                console.log("no receiveType specified");
+                console.log(docData.receiveType);
+            }
+            console.log("Done");
+        });
     });
 });
 

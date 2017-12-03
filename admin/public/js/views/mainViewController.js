@@ -214,7 +214,8 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
         timeRange:{
             range: "w",
             date: new Date()
-        }
+        },
+        email:null
     };
     $pdf.username = user.username;
     $pdf.downloadable = false;
@@ -224,18 +225,23 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
 
     $pdf.generatePDF = function () {
         if($pdf.docData.timeRange.date !== "" && $pdf.docData.timeRange.date!==null) {
-            console.log($pdf.docData);
-            $pdf.loadingPDF = true;
-            $pdf.errorMessage = "";
-            EventService.generatePDFFile($pdf.docData).then(function (response) {
-                console.log(response);
+            if($pdf.docData.receiveType !== "email" || $pdf.docData.email!==null) {
+                console.log($pdf.docData);
+                $pdf.loadingPDF = true;
+                $pdf.errorMessage = "";
+                EventService.generatePDFFile($pdf.docData).then(function (response) {
+                    console.log(response);
+                    $pdf.loadingPDF = false;
+                    if ($pdf.docData.receiveType === "saveOnClient") {
+                        $pdf.downloadable = true;
+                    } else {
+                        $pdf.ok();
+                    }
+                })
+            }else{
+                $pdf.errorMessage = "Bitte gib eine E-Mail Addresse an, zu welcher der Arbeitsnachweis gesendet werden soll.";
                 $pdf.loadingPDF = false;
-                if ($pdf.docData.receiveType === "saveOnClient") {
-                    $pdf.downloadable = true;
-                } else {
-                    $pdf.ok();
-                }
-            })
+            }
         }else{
             $pdf.errorMessage = "Das Datumsfeld darf nicht leer sein! Bitte wähle einen Zeitraum.";
             $pdf.loadingPDF = false;
@@ -258,7 +264,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
 
         switch ($pdf.docData.timeRange.range){
             case "w":
-                $pdf.datepicker.format = "W w, MMMM yyyy";
+                $pdf.datepicker.format = "'Woche' w, MMMM yyyy";
                 break;
             case "m":
                 $pdf.datepicker.format = "MMMM yyyy";

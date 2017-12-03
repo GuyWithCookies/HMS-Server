@@ -1,27 +1,9 @@
 ServerAdminBereich:
 Test Map with real gps data (remove position randomization)
 
-add regular email sending
-one email with zip for regular email sending
-add user selection to emailsettings
-prettify email
-new emailadress
 if no events --> no pdf gen
 
-FIX: zip kills pdf format
-
+Email Check bevor Arbeitszeitnachweis generieren
 
 stresstest database --> pdf generierung
 stresstest database --> loading many events to phone (--> maybe limit count
-
-
-
-MongoDB:
-   Root User:     admin
-   Root Password: cfKyF1LxEmZy
-   Database Name: hmsserver
-
-RockMongo:
-    RockMongo User: admin
-    RockMongo Password: cfKyF1LxEmZy
-    URL: https://hmsserver-guywithcookies.rhcloud.com/rockmongo/

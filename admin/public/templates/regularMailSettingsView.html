@@ -1,5 +1,5 @@
 <navbar></navbar>
-<div class="col-xs-12 col-xs-offset-0 col-md-4 col-sm-offset-4" style="padding-bottom:3em;">
+<div class="col-xs-12 col-xs-offset-0 col-md-6 col-sm-offset-3" style="padding-bottom:3em;">
     <h1>Einstellung für automatische E-Mails</h1>
     <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
     <div ng-show="successMessage" class="alert alert-success">{{successMessage}}</div>
@@ -14,25 +14,56 @@
         <div class="form-group">
             <label>Automatische E-Mails aktivieren</label>
             <input type="checkbox" class="checkbox-inline"
-                   name="enable" ng-model="regMail.enable" required>
+                   name="enable" ng-model="regMail.enable">
         </div>
         <hr>
         <div class="form-group">
             <label>Einmal</label>
             <label class="radio-inline">
-                <input type="radio" name="optradio" ng-model="regMail.range" value="w">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="w" ng-change="setFormat()">
                 pro Woche
             </label>
             <label class="radio-inline">
-                <input type="radio" name="optradio" ng-model="regMail.range" value="m">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="m" ng-change="setFormat()">
                 pro Monat
             </label>
             <label class="radio-inline">
-                <input type="radio" name="optradio" ng-model="regMail.range" value="y">
+                <input type="radio" name="optradio" ng-model="regMail.range" value="y" ng-change="setFormat()">
                 pro Jahr
             </label>
         </div>
         <hr>
+        <div class="form-group">
+            <p>Wähle Mitarbeiter aus, für welche ein Arbeitszeitnachweis erstellt werden soll.</p>
+            <ul class="list-group" ng-show="userList.length>0">
+                <li ng-repeat="user in userList" class="list-group-item" ng-click="toggleUser(user.username)"
+                    ng-class="{'list-group-item-success':userInList(user.username)}">
+                    {{user.forename}} {{user.username}} <span ng-show="userInList(user.username)"
+                                                              class="pull-right"><span class="glyphicon glyphicon-ok"></span></span>
+                </li>
+            </ul>
+        </div>
+        <hr>
+        <div class="form-group">
+            <p>Lege die Uhrzeit und den Wochentag (bzw. Monatstag bei monatlichen Mails) fest, wann dir die Arbeitszeitnachweise geschickt werden sollen.</p>
+            <label for="datePick">
+                <div ng-show="regMail.range==='w'">Datum (Wochentag):</div>
+                <div ng-show="regMail.range!=='w'">Datum (Tag im Monat)</div>
+            </label>
+
+            <p class="input-group" id="datePick">
+                <input  type="text" class="form-control" uib-datepicker-popup="{{datePicker.format}}" ng-model="datePicker.date"
+                       is-open="datePicker.opened" datepicker-options="datePicker.options" ng-change="test()" close-text="Schließen" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="datePicker.opened=!datePicker.opened">
+                        <i class="glyphicon glyphicon-calendar"></i></button>
+                 </span>
+            </p>
+            <div class="input-group">
+                <label for="timePicker">Uhrzeit:</label>
+                <div id="timePicker" uib-timepicker ng-model="regMail.sendDate.time" show-meridian="false"></div>
+            </div>
+        </div>
         <div class="form-group">
             <label>Empfänger E-Mail Addresse</label>
             <input type="email" class="form-control" name="username" ng-model="regMail.email" required>
