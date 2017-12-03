@@ -27,11 +27,13 @@ var MailSender =  {
     sendSingleMail: function (data, cb) {
         //continue with sending reg mail
         var mailOptions = {
-            from: 'arbeitszeit@hms-guenther.com',
+            from: 'HMSG_Sekretaer_Benni',
             to: data.email,
             subject: 'Arbeitszeitnachweis für '+data.forename+" "+data.username,
             html: '<h1>Arbeitszeitnachweis für '+data.forename+' '+data.username+'</h1>' +
-            '<p>Öffne den Anhang um den Arbeitszeitnachweis herunterzuladen!</p>',
+            '<p>Öffne den Anhang um den Arbeitszeitnachweis herunterzuladen!</p><br>' +
+            '                <p>Viele Grüße und einen schönen Tag,</p>'+
+            '                <p><small>HMSG Sekretär Benni :-) </small></p>',
             attachments: [{
                 filename: 'Arbeitszeitnachweis_'+data.forename+"_"+data.username+".pdf",
                 path: '../admin/public/pdf/Arbeitszeitnachweis.pdf',
