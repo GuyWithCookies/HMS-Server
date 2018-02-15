@@ -102,85 +102,88 @@ var MailSender =  {
                         //TODO Error if user doesnt exists
                         var userdata = usersData[0];
                         console.log(userdata);
-                        Event.find({
-                            "username": userdata.username
-                        }, function (err, docs) {
-                            if (err) {
-                                console.log(err);
-                                return;
-                            }
 
-                            var docData = {
-                                forename: userdata.forename,
-                                username: userdata.username,
-                                timeRange: {
-                                    range: emailSettings.range,
-                                    date: moment()
+                        if(userdata) {
+                            Event.find({
+                                "username": userdata.username
+                            }, function (err, docs) {
+                                if (err) {
+                                    console.log(err);
+                                    return;
                                 }
-                            };
 
-                            Object.assign(docData, emailSettings);
+                                var docData = {
+                                    forename: userdata.forename,
+                                    username: userdata.username,
+                                    timeRange: {
+                                        range: emailSettings.range,
+                                        date: moment()
+                                    }
+                                };
 
-                            docData.events = docs;
-                            console.log("Generating PDF for "+docData.username+"...");
-                            var content = pdfGenerator.generateContent(docData);
-                            var definition = pdfGenerator.defaultDefinition;
+                                Object.assign(docData, emailSettings);
 
-                            if (!emailSettings.coverSheet) {
-                                definition.pageOrientation = "landscape";
-                            }
+                                docData.events = docs;
+                                console.log("Generating PDF for " + docData.username + "...");
+                                var content = pdfGenerator.generateContent(docData);
+                                var definition = pdfGenerator.defaultDefinition;
 
-                            definition["content"] = content;
-                            definition["footer"] = function (pagenumber, pagecount) {
-                                if (pagenumber === 1 && docData.coverSheet) {
-                                    return {
-                                        columns: [
-                                            'erstellt am ' + moment().format("DD.MM.Y"),
-                                            {
-                                                alignment: "center",
-                                                text: [
-                                                    {text: pagenumber.toString(), italics: true},
-                                                    '/',
-                                                    {text: pagecount.toString(), italics: true}
-                                                ]
-                                            },
-                                            {
-                                                alignment: 'right',
-                                                text: "©HMS Günther",
-                                                italics: true
+                                if (!emailSettings.coverSheet) {
+                                    definition.pageOrientation = "landscape";
+                                }
+
+                                definition["content"] = content;
+                                definition["footer"] = function (pagenumber, pagecount) {
+                                    if (pagenumber === 1 && docData.coverSheet) {
+                                        return {
+                                            columns: [
+                                                'erstellt am ' + moment().format("DD.MM.Y"),
+                                                {
+                                                    alignment: "center",
+                                                    text: [
+                                                        {text: pagenumber.toString(), italics: true},
+                                                        '/',
+                                                        {text: pagecount.toString(), italics: true}
+                                                    ]
+                                                },
+                                                {
+                                                    alignment: 'right',
+                                                    text: "©HMS Günther",
+                                                    italics: true
+                                                }
+                                            ],
+                                            margin: [30, 0, 30, 0]
+                                        };
+                                    } else {
+                                        return {
+                                            alignment: "center",
+                                            text: [
+                                                {text: pagenumber.toString(), italics: true},
+                                                '/',
+                                                {text: pagecount.toString(), italics: true}
+                                            ],
+                                            margin: [30, 0, 0, 30]
+                                        };
+                                    }
+                                };
+
+                                //saves generated pdf to temp/report.pdf
+                                pdfGenerator.generatePDF(definition, "Arbeitszeitnachweise/" + docData.username + ".pdf", function () {
+                                    console.log("Done");
+                                    donePDFs++;
+                                    if (donePDFs === users.length) {
+                                        zipFolder('../admin/public/pdf/Arbeitszeitnachweise', '../admin/public/pdf/Arbeitszeitnachweise.zip', function (err) {
+                                            if (err) {
+                                                console.log('oh no!', err);
+                                            } else {
+                                                console.log('EXCELLENT');
+                                                cb();
                                             }
-                                        ],
-                                        margin: [30, 0, 30, 0]
-                                    };
-                                } else {
-                                    return {
-                                        alignment: "center",
-                                        text: [
-                                            {text: pagenumber.toString(), italics: true},
-                                            '/',
-                                            {text: pagecount.toString(), italics: true}
-                                        ],
-                                        margin: [30, 0, 0, 30]
-                                    };
-                                }
-                            };
-
-                            //saves generated pdf to temp/report.pdf
-                            pdfGenerator.generatePDF(definition, "Arbeitszeitnachweise/"+docData.username+".pdf", function () {
-                                console.log("Done");
-                                donePDFs++;
-                                if(donePDFs===users.length){
-                                    zipFolder('../admin/public/pdf/Arbeitszeitnachweise', '../admin/public/pdf/Arbeitszeitnachweise.zip', function(err) {
-                                        if(err) {
-                                            console.log('oh no!', err);
-                                        } else {
-                                            console.log('EXCELLENT');
-                                            cb();
-                                        }
-                                    });
-                                }
+                                        });
+                                    }
+                                });
                             });
-                        });
+                        }
                     });
                 }
             }
