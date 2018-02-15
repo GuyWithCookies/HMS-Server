@@ -1,9 +1,4 @@
 ServerAdminBereich:
-Test Map with real gps data (remove position randomization)
-
-if no events --> no pdf gen
-
-Email Check bevor Arbeitszeitnachweis generieren
 
 stresstest database --> pdf generierung
 stresstest database --> loading many events to phone (--> maybe limit count
