@@ -15,8 +15,8 @@ moment.locale('de');
 
 var options = {
     auth: {
-        api_user: 'HMSSender',
-        api_key: 'Benjamin!1'
+        api_user: 'MyHMSSender',
+        api_key: 'ML9sYSkSK6YjU4czQCq5TvxcHWLsKbgG'
     }
 
 };
@@ -36,7 +36,7 @@ var MailSender =  {
             '                <p><small>HMSG Sekretär Benni :-) </small></p>',
             attachments: [{
                 filename: 'Arbeitszeitnachweis_'+data.forename+"_"+data.username+".pdf",
-                path: '../admin/public/pdf/Arbeitszeitnachweis.pdf',
+                path: '/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweis.pdf',
                 contentType: 'application/pdf'
             }]
         };
@@ -64,7 +64,7 @@ var MailSender =  {
                 '<p><small>HMSG Sekretär Benni :-) </small></p>',
                 attachments: [{
                     filename: 'Arbeitszeitnachweise_'+dateString+'.zip',
-                    path: '../admin/public/pdf/Arbeitszeitnachweise.zip'
+                    path: '/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise.zip'
                 }]
             };
 
@@ -84,12 +84,11 @@ var MailSender =  {
         var donePDFs = 0;
         console.log(users);
         //make folder for archiv
-        rimraf('../admin/public/pdf/Arbeitszeitnachweise', function () {
-            if(!fs.existsSync("../admin/public/pdf/Arbeitszeitnachweise")) {
-                fs.mkdirSync("../admin/public/pdf/Arbeitszeitnachweise");
+        rimraf('/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise', function () {
+            if(!fs.existsSync("/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise")) {
+                fs.mkdirSync("/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise");
             }
-
-            for(var user in users) {
+		for(var user in users) {
                 if (users.hasOwnProperty(user)) {
                     //get all events for the user
                     User.find({
@@ -172,7 +171,7 @@ var MailSender =  {
                                     console.log("Done");
                                     donePDFs++;
                                     if (donePDFs === users.length) {
-                                        zipFolder('../admin/public/pdf/Arbeitszeitnachweise', '../admin/public/pdf/Arbeitszeitnachweise.zip', function (err) {
+                                        zipFolder('/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise', '/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise.zip', function (err) {
                                             if (err) {
                                                 console.log('oh no!', err);
                                             } else {
@@ -187,7 +186,7 @@ var MailSender =  {
                     });
                 }
             }
-        });
+	});
     },
 
     /**
@@ -246,7 +245,7 @@ var MailSender =  {
 
         emailSettings.sendDate.date = moment(nextTime).toISOString();
         emailSettings.sendDate.time = moment(nextTime).toISOString();
-        fs.writeFile('settings/emailSettings.json', JSON.stringify(emailSettings, null, 4), function (err) {
+        fs.writeFile('/home/benni/HMS-Server/server/settings/emailSettings.json', JSON.stringify(emailSettings, null, 4), function (err) {
             if (err) throw err;
             console.log('The SettingsObj has been updated!');
         });

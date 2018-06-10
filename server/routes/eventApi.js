@@ -58,14 +58,12 @@ router.post('/getEmailSettings', function(req, res) {
 router.post('/setEmailSettings', function(req, res) {
     console.log(req.body.settings);
     emailSettings = req.body.settings;
-    fs.writeFile('./settings/emailSettings.json', JSON.stringify(emailSettings, null, 4), function (err) {
+
+    fs.writeFile('/home/benni/HMS-Server/server/settings/emailSettings.json', JSON.stringify(emailSettings, null, 4), function (err) {
         if (err) {
-            res.json({
-                data: err.toString(),
-                status: "FAILED"
-            });
             throw err;
         }
+
         console.log('The file has been saved!');
     });
 

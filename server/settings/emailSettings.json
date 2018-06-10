@@ -1,14 +1,20 @@
 {
-    "email": "benjamin.schimke95@gmail.com",
+    "email": "info@hms-guenther.de",
     "range": "w",
     "enable": true,
     "coverSheet": true,
     "summary": true,
     "users": [
-        "Benjamin"
+        "Stümpfel",
+        "Brückner",
+        "Mosler",
+        "Wieth",
+        "Schindler",
+        "Petters",
+        "Hinzke"
     ],
     "sendDate": {
-        "time": "2018-02-22T15:45:43.392Z",
-        "date": "2018-02-22T15:45:43.392Z"
+        "time": "2018-06-10T19:30:00.555Z",
+        "date": "2018-06-10T19:30:00.555Z"
     }
 }

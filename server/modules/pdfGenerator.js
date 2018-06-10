@@ -1,9 +1,9 @@
 var fonts = {
     Roboto: {
-        normal: '../server/fonts/Roboto-Regular.ttf',
-        bold: '../server/fonts/Roboto-Medium.ttf',
-        italics: '../server/fonts/Roboto-Italic.ttf',
-        bolditalics: '../server/fonts/Roboto-MediumItalic.ttf'
+        normal: '/home/benni/HMS-Server/server/fonts/Roboto-Regular.ttf',
+        bold: '/home/benni/HMS-Server/server/fonts/Roboto-Medium.ttf',
+        italics: '/home/benni/HMS-Server/server/fonts/Roboto-Italic.ttf',
+        bolditalics: '/home/benni/HMS-Server/server/fonts/Roboto-MediumItalic.ttf'
     }
 };
 
@@ -19,7 +19,7 @@ var pdfGenerator = {
     generatePDF: function (docDefinition, fileName, cb) {
         var pdfDoc = printer.createPdfKitDocument(docDefinition);
         var file = fileName || "Arbeitszeitnachweis.pdf";
-        var filePath = "../admin/public/pdf/"+file;
+        var filePath = "/home/benni/HMS-Server/admin/public/pdf/"+file;
         console.log(fileName);
         fs.closeSync(fs.openSync(filePath, 'w'));
 
