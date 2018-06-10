@@ -51,12 +51,12 @@ var MailSender =  {
         });
     },
 
-    sendRegMail: function () {
-        this.generateUserDataArchiv(function () {
-            var dateString = moment().format(MailSender.getDateFormat(emailSettings.range));
+    sendRegMail: function (email=null, dat=null, range=null) {
+        this.generateUserDataArchiv(dat, range, function () {
+            var dateString = moment(dat || null).format(MailSender.getDateFormat(range || emailSettings.range));
             var mailOptions = {
                 from: 'HMSG_Sekretaer_Benni',
-                to: emailSettings.email,
+                to: email || emailSettings.email,
                 //TODO add timedescription
                 subject: 'Arbeitszeitnachweise für '+dateString,
                 html: '<h1>Arbeitszeitnachweise</h1><p>Im Anhang befinden sich die Arbeitszeitnachweise für '+dateString+'</p><br>' +
@@ -78,11 +78,11 @@ var MailSender =  {
         });
     },
 
-    generateUserDataArchiv: function (cb) {
+    generateUserDataArchiv: function (dat, range, cb) {
         //get all users
         var users = emailSettings.users;
         var donePDFs = 0;
-        console.log(users);
+
         //make folder for archiv
         rimraf('/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise', function () {
             if(!fs.existsSync("/home/benni/HMS-Server/admin/public/pdf/Arbeitszeitnachweise")) {
@@ -115,8 +115,8 @@ var MailSender =  {
                                     forename: userdata.forename,
                                     username: userdata.username,
                                     timeRange: {
-                                        range: emailSettings.range,
-                                        date: moment()
+                                        range: range || emailSettings.range,
+                                        date: moment(dat || null)
                                     }
                                 };
 

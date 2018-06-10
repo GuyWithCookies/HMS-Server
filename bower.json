@@ -33,7 +33,9 @@
     "angular-sanitize": "1.5.5",
     "angular-route": "1.5.7",
     "DateJS": "datejs#^1.0.0-rc3",
-    "ngmap": "^1.18.4"
+    "ngmap": "^1.18.4",
+    "lodash": "^4.17.10",
+    "angular-simple-logger": "^0.1.7"
   },
   "resolutions": {
     "angular": ">=1.2.16 1.4.x"

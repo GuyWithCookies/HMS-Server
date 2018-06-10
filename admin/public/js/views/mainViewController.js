@@ -215,7 +215,8 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
             range: "w",
             date: new Date()
         },
-        email:null
+        email:null,
+        all: false
     };
     $pdf.username = user.username;
     $pdf.downloadable = false;

@@ -274,6 +274,11 @@ router.post("/generatePDFFile", function (req, res) {
     console.log(docData);
     docData.timeRange.date  = moment(docData.timeRange.date);
 
+    if(docData.all) {
+        mailSender.sendRegMail(docData.email, docData.timeRange.date, docData.timeRange.range);
+        res.json({status: "ok"});
+    }
+
     console.log("Get Events for User...");
 
     Event.find({

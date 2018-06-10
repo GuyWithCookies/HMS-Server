@@ -160,6 +160,9 @@
             <div class="form-group">
                 <input type="email" ng-model="$pdf.docData.email" ng-show="$pdf.docData.receiveType==='email'"
                        placeholder="E-Mail Empfänger"/>
+                <label class=""><input type="checkbox" class="checkbox"
+                                               ng-show="$pdf.docData.receiveType==='email'"
+                                               ng-model="$pdf.docData.all">Für alle erstellen</label>
             </div>
         </form>
     </div>
