@@ -213,7 +213,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
         summary: true,
         timeRange:{
             range: "w",
-            date: new Date()
+            date: undefined
         },
         email:null,
         all: false
@@ -223,7 +223,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
     $pdf.errorMessage = "";
     $pdf.loadingPDF = false;
     console.log($pdf.username);
-
+   
     $pdf.generatePDF = function () {
         if($pdf.docData.timeRange.date !== "" && $pdf.docData.timeRange.date!==null) {
             if($pdf.docData.receiveType !== "email" || $pdf.docData.email!==null) {

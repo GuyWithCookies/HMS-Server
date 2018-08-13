@@ -52,8 +52,16 @@ var MailSender =  {
     },
 
     sendRegMail: function (email=null, dat=null, range=null) {
+	console.log(email)
+	console.log(dat)
+	console.log(range)
         this.generateUserDataArchiv(dat, range, function () {
-            var dateString = moment(dat || null).format(MailSender.getDateFormat(range || emailSettings.range));
+            if (dat) {
+		var dateString = moment(dat, "DD.MM.YYYY").format(MailSender.getDateFormat(range || emailSettings.range));
+            } else {
+                var dateString = moment().format(MailSender.getDateFormat(range || emailSettings.range));
+            }
+
             var mailOptions = {
                 from: 'HMSG_Sekretaer_Benni',
                 to: email || emailSettings.email,
@@ -111,12 +119,13 @@ var MailSender =  {
                                     return;
                                 }
 
+				var myDate = dat ? moment(dat, "DD.MM.YYYY") : moment();
                                 var docData = {
                                     forename: userdata.forename,
                                     username: userdata.username,
                                     timeRange: {
                                         range: range || emailSettings.range,
-                                        date: moment(dat || null)
+                                        date: myDate
                                     }
                                 };
 

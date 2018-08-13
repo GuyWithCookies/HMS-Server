@@ -272,13 +272,13 @@ router.post("/getGpsPositions", function (req, res) {
 router.post("/generatePDFFile", function (req, res) {
     var docData = req.body.docData;
     console.log(docData);
-    docData.timeRange.date  = moment(docData.timeRange.date);
+    docData.timeRange.date  = moment(docData.timeRange.date, "DD.MM.YYYY");
 
     if(docData.all) {
         mailSender.sendRegMail(docData.email, docData.timeRange.date, docData.timeRange.range);
         res.json({status: "ok"});
-    }
-
+    } else {
+     
     console.log("Get Events for User...");
 
     Event.find({
@@ -353,6 +353,7 @@ router.post("/generatePDFFile", function (req, res) {
             console.log("Done");
         });
     });
+  }
 });
 
 module.exports = router;
