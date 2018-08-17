@@ -52,16 +52,11 @@ router.post('/adminLogin', function(req, res, next) {
                     });
                 }
                 if (docs.length > 0) {
-                    if(docs[0].admin) {
                         console.log("Login successfull");
                         return res.status(200).json({
-                            status: "Login successful!"
+                            status: "Login successful!",
+                            user: docs[0]
                         })
-                    }else{
-                        return res.status(401).json({
-                            err: "Not an Admin!"
-                        });
-                    }
                 } else {
                     console.log("Cant find any users");
                     return res.status(401).json({

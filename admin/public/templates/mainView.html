@@ -59,21 +59,29 @@
                                 <h4>{{view.viewDate|date:format}}</h4>
                             </div>
                             <div style="font-size: 2em;" class="col-sm-3">
-                                <span class="pull-right glyphicon glyphicon-file"
+                                <span ng-show="userdata.admin"
+                                      class="pull-right glyphicon glyphicon-file"
                                       uib-tooltip="Erstelle einen Zeitplan als PDF zum Download oder als E-Mail
                                       (Woche, Monat, Jahr)"
                                       ng-click="openPDFModal(user)"
                                       tooltip-popup-delay="1000">
                                 </span>
-                                <span class="glyphicon glyphicon-map-marker pull-right"
+                                <span ng-show="userdata.admin"
+                                      class="glyphicon glyphicon-map-marker pull-right"
                                       uib-tooltip="Zeige die Positionen auf der Karte an"
                                       tooltip-popup-delay="1000"
                                       style="margin-right: 10px;"
                                       ng-click="openMapModal(user)">
                                 </span>
                                 <span class="pull-right glyphicon glyphicon-cog"
-                                      uib-tooltip="Ändere/Lösche die Mitarbeiterdaten."
+                                      uib-tooltip="Ändere die Mitarbeiterdaten."
                                       ng-click="openChangeUserModal(user)"
+                                      tooltip-popup-delay="1000">
+                                </span>
+                                <span ng-show="!userdata.admin"
+                                      class="pull-right glyphicon glyphicon-plus"
+                                      uib-tooltip="Erstelle einen neuen Arbeitszeitnachweis!"
+                                      ng-click="openEventModal(user)"
                                       tooltip-popup-delay="1000">
                                 </span>
                             </div>
@@ -121,15 +129,15 @@
             </div>
             <div class="form-group" style="padding-top: 1em;">
                 <p class="input-group" ng-show="$pdf.datepicker.show">
-                    <div>
-                                        <input type="text" class="form-control"
+                <div>
+                    <input type="text" class="form-control"
                            ng-change="$pdf.rstBtn();"
                            ng-model="$pdf.docData.timeRange.date"
                            placeholder="konkreten Zeitraum auswählen"
-                           />
+                    />
 
-	 	    </div>
-                    <span class="input-group-btn">
+                </div>
+                <span class="input-group-btn">
                                 <button type="button" class="btn btn-default"
                                         ng-click="$pdf.datepicker.opened = !$pdf.datepicker.opened">
                                 <i class="glyphicon glyphicon-calendar"></i></button>
@@ -160,9 +168,9 @@
                 <input type="email" ng-model="$pdf.docData.email" ng-show="$pdf.docData.receiveType==='email'"
                        placeholder="E-Mail Empfänger"/>
                 <label class="" ng-show="$pdf.docData.receiveType==='email'">
-					<input type="checkbox" class="checkbox"
-                                               ng-show="$pdf.docData.receiveType==='email'"
-                                               ng-model="$pdf.docData.all">Für alle erstellen</label>
+                    <input type="checkbox" class="checkbox"
+                           ng-show="$pdf.docData.receiveType==='email'"
+                           ng-model="$pdf.docData.all">Für alle erstellen</label>
             </div>
         </form>
     </div>
@@ -346,7 +354,7 @@
                         class="span3 col-md-3 col-xs-6 cal-cell {{ day.cssClass }}"
                         ng-repeat="month in vm.view | calendarLimitTo:4:rowOffset track by $index"
                         ng-init="monthIndex = vm.view.indexOf(month)"
-                        ng-click="vm.monthClicked(month, false, $event)"
+                        ng-click="vm.monthClicked(month, false, $ev)"
                         ng-class="{pointer: month.events.length > 0, 'cal-day-today': month.isToday}"
                         mwl-droppable
                         on-drop="vm.handleEventDrop(dropData.event, month.date)">
@@ -382,6 +390,103 @@
     </div>
 </script>
 
+<script type="text/ng-template" id="addNewEvent.html">
+    <div class="modal-header">
+        <h3 class="modal-title" id="eventModalTitle">
+            Erstelle/Bearbeite einen Arbeitszeitnachweis
+        </h3>
+    </div>
+    <div class="modal-body col-sm-12" id="eventModal">
+        <form class="form-horizontal col-sm-8 col-sm-offset-2">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="date">Datum:</label>
+                <div class="col-sm-10">
+                    <input type="date" class="form-control" id="date" ng-model="$ev.day.date">
+                </div>
+            </div>
+            <hr>
+            <h3>Objekte</h3>
+            <div ng-repeat="object in $ev.day.objects track by $index"
+                 style="background-color: #e2e2e2; border: 3px black; margin-bottom: 2em; padding: 1em">
+                <div class="form-group" >
+                    <label class="control-label col-sm-2" for="object_name">Name:</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="object_name" ng-model="object.object">
+                    </div>
+                    <button class="btn btn-danger col-sm-1" type="button" ng-click="$ev.removeEvent($index)">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="object_activity">Tätigkeit:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="object_activity" ng-model="object.activity">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="object_start">Beginn:</label>
+                    <div class="col-sm-4">
+                        <input type="time" class="form-control" id="object_start" ng-model="object.start">
+                    </div>
+                    <label class="control-label col-sm-2" for="object_end">Ende:</label>
+                    <div class="col-sm-4">
+                        <input type="time" class="form-control" id="object_end" ng-model="object.end">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="object_comment">Bemerkungen:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="object_comment" ng-model="object.comment">
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary pull-right" type="button" ng-click="$ev.addEmptyObject()">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <hr>
+
+            <h3>Pause</h3>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="break_start">Beginn:</label>
+                <div class="col-sm-3">
+                    <input type="time" class="form-control" id="break_start" ng-model="$ev.day.break.start">
+                </div>
+
+                <label class="control-label col-sm-2" for="break_end">Ende:</label>
+                <div class="col-sm-3">
+                    <input type="time" class="form-control" id="break_end" ng-model="$ev.day.break.end">
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <div class="alert alert-warning" ng-show="$ev.errorMessage!==''">
+            <span class="glyphicon glyphicon-info-sign"></span> {{$ev.errorMessage}}
+        </div>
+
+        <button class="btn btn-primary pull-right" type="button" ng-click="$ev.submitDay()">Speichern</button>
+        <button class="btn btn-danger pull-right" type="button" ng-click="$ev.ok()">Abbrechen</button>
+
+        <div class="sk-fading-circle" ng-show="$ev.loading">
+            <div class="sk-circle1 sk-circle"></div>
+            <div class="sk-circle2 sk-circle"></div>
+            <div class="sk-circle3 sk-circle"></div>
+            <div class="sk-circle4 sk-circle"></div>
+            <div class="sk-circle5 sk-circle"></div>
+            <div class="sk-circle6 sk-circle"></div>
+            <div class="sk-circle7 sk-circle"></div>
+            <div class="sk-circle8 sk-circle"></div>
+            <div class="sk-circle9 sk-circle"></div>
+            <div class="sk-circle10 sk-circle"></div>
+            <div class="sk-circle11 sk-circle"></div>
+            <div class="sk-circle12 sk-circle"></div>
+        </div>
+    </div>
+</script>
+
 <script type="text/ng-template" id="changeUserModal.html">
     <div class="modal-header">
         <h3 class="modal-title" id="cuModalTitle">
@@ -390,27 +495,29 @@
     </div>
     <div class="modal-body col-sm-12" id="cuModal">
         <form class="form-horizontal col-sm-8 col-sm-offset-2">
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="forename">Vorname:</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="forename" ng-model="$cuModal.newUserData.forename">
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-sm-2" for="forename">Nachname:</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="surname" ng-model="$cuModal.newUserData.surname"
-                           ng-change="$cuModal.newUserData.username=$cuModal.newUserData.surname">
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <div class="checkbox">
-                        <label><input type="checkbox" ng-model="$cuModal.newUserData.admin  ">Administratorzugang</label>
+            <div ng-show="userdata.admin">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="forename">Vorname:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="forename" ng-model="$cuModal.newUserData.forename">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="forename">Nachname:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="surname" ng-model="$cuModal.newUserData.surname"
+                               ng-change="$cuModal.newUserData.username=$cuModal.newUserData.surname">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <div class="checkbox">
+                            <label><input type="checkbox" ng-model="$cuModal.newUserData.admin  ">Administratorzugang</label>
+                        </div>
+                    </div>
+                </div>
+                <hr>
             </div>
-            <hr>
             <div class="form-group">
                 <label class="control-label col-sm-2" for="pwd">Aktuelles Passwort:</label>
                 <div class="col-sm-10">

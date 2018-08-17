@@ -2,6 +2,7 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
     'moment', '$uibModal', "calendarConfig",
     function($scope, AuthService, EventService, moment, $uibModal, calendarConfig) {
         $scope.userList = {};
+        $scope.userdata = null;
 
         //calendar stuff
         $scope.view = {};
@@ -18,21 +19,31 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
         };
         $scope.format = $scope.formats[$scope.view.calendarView];
         $scope.$watch("view.calendarView", function(){
-            console.log("blb");
-           $scope.format = $scope.formats[$scope.view.calendarView];
+            $scope.format = $scope.formats[$scope.view.calendarView];
         });
         //functions
         $scope.getUserList = function () {
-            AuthService.getAllUsers().then(function (res) {
-                console.log(res);
-                $scope.userList = res;
-                $scope.credSavePossible = false;
+            AuthService.getCurrentUser().then(function (username) {
+                AuthService.getUserData(username).then(function (userdata) {
+                    $scope.userdata = userdata;
+
+                    if (userdata.admin) {
+                        AuthService.getAllUsers().then(function (res) {
+                            console.log(res);
+                            $scope.userList = res;
+                            $scope.credSavePossible = false;
+                        })
+                    } else {
+                        $scope.userList = [userdata];
+                        $scope.credSavePossible = false;
+                    }
+                })
             })
         };
 
         //users...Array
         $scope.getEvents = function (username) {
-            var startMoment = moment($scope.view.viewDate);
+            var startMoment = moment().subtract(7, "days");
             var queryData = {
                 username: username,
                 startsAt: startMoment.unix(),
@@ -102,6 +113,27 @@ app.controller('mainViewController', ['$scope', 'AuthService', 'EventService',
             });
         };
 
+        $scope.openEventModal = function (user) {
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: 'addNewEvent.html',
+                controller: 'eventModalInstanceCtrl',
+                controllerAs: '$ev',
+                size: "lg",
+                resolve: {
+                    user: function () {
+                        return user
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (){
+                console.log("Done");
+                $scope.getEvents($scope.userdata.username)
+            }, function () {
+            });
+        };
+
         $scope.openChangeUserModal = function (user) {
             console.log(user);
             var modalInstance = $uibModal.open({
@@ -154,7 +186,6 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
         $ctrl.errorMessage = "";
         try {
             $ctrl.timeout.cancel();
-            console.log("Canceled timeout");
         }catch (e){}
 
         var timestamp = moment($ctrl.datepicker.date, "dd MMMM yyyy").unix();
@@ -179,7 +210,6 @@ app.controller('ModalInstanceCtrl', function (NgMap, $uibModalInstance, $timeout
 
     //TODO time for marker
     $ctrl.showTime = function(e, marker) {
-        console.log("in ShowTime");
         $ctrl.clickedMarker = marker;
         $ctrl.map.showInfoWindow('iw', marker._id);
     };
@@ -223,7 +253,7 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
     $pdf.errorMessage = "";
     $pdf.loadingPDF = false;
     console.log($pdf.username);
-   
+
     $pdf.generatePDF = function () {
         if($pdf.docData.timeRange.date !== "" && $pdf.docData.timeRange.date!==null) {
             if($pdf.docData.receiveType !== "email" || $pdf.docData.email!==null) {
@@ -285,6 +315,128 @@ app.controller('pdfModalInstanceCtrl', function ($uibModalInstance, EventService
     };
 
     $pdf.timeRangeChanged();
+});
+
+app.controller('eventModalInstanceCtrl', function ($uibModalInstance, EventService, user) {
+    var $ev = this;
+    $ev.user = user;
+    $ev.errorMessage = "";
+    $ev.loading = false;
+    $ev.day = {
+        date: new Date(),
+        objects: [{}],
+        break: {}
+    };
+    console.log($ev.user.username);
+
+    $ev.addEmptyObject = function () {
+        $ev.day.objects.push({})
+    };
+
+    //create new Event on server
+    $ev.setEvent = function (eventData) {
+        EventService.setEvent(eventData).then(function (response) {
+            console.log("Successfull created new Event");
+            $ev.ok()
+        }, function (error) {
+            console.log(error);
+        })
+    };
+
+    $ev.submitDay = function () {
+        //submit
+        var format = "H:mm";
+
+        //check if event collides with pause --> make 2 events
+        for(var obj in $ev.day.objects){
+            if($ev.day.objects.hasOwnProperty(obj)){
+                console.log($ev.day.objects[obj]);
+                console.log($ev.day.break.start);
+                if(moment($ev.day.break.start).isBetween(moment($ev.day.objects[obj].start)
+                    , moment($ev.day.objects[obj].end))){
+                    console.log("split");
+                    var tempObj = $ev.day.objects[obj];
+                    $ev.day.objects.splice(obj, 1);
+
+                    var eventBeforePause = Object.assign({}, tempObj);
+                    eventBeforePause.end = $ev.day.break.start;
+                    $ev.day.objects.push(eventBeforePause);
+
+                    var eventAfterPause = Object.assign({}, tempObj);
+                    eventAfterPause.start = $ev.day.break.end;
+                    $ev.day.objects.push(eventAfterPause);
+                }else if(moment($ev.day.break.end).isBetween(moment($ev.day.objects[obj].start)
+                    , moment($ev.day.objects[obj].end))){
+                    console.log("also split");
+                }
+            }
+        }
+        for(var obj in $ev.day.objects) {
+            if($ev.day.objects.hasOwnProperty(obj)) {
+                var currObj = $ev.day.objects[obj];
+
+                //check if event collides with pause time
+                //if so --> make two events
+                if(currObj.object && currObj.start && currObj.end){
+                    $ev.setEvent({
+                        title: currObj.object,
+                        username: $ev.user.username,
+                        start: moment($ev.day.date).startOf("day").add(currObj.start.getHours(), "hours")
+                            .add(currObj.start.getMinutes(), "minutes").unix(),
+                        end: moment($ev.day.date).startOf("day").add(currObj.end.getHours(), "hours")
+                            .add(currObj.end.getMinutes(), "minutes").unix(),
+                        comment: currObj.comment || "",
+                        object: currObj.object || "",
+                        activity: currObj.activity || "",
+                        type: "object"
+                    });
+                }
+            }
+        }
+
+        //break
+        if($ev.day.break.start && $ev.day.break.end) {
+            $ev.setEvent({
+                title: "Pause",
+                username: $ev.user.username,
+                start: moment($ev.day.date).startOf("day").add($ev.day.break.start.getHours(), "hours")
+                    .add($ev.day.break.start.getMinutes(), "minutes").unix(),
+                end: moment($ev.day.date).startOf("day").add($ev.day.break.end.getHours(), "hours")
+                    .add($ev.day.break.end.getMinutes(), "minutes").unix(),
+                type: "break"
+            });
+        }
+    };
+
+    $ev.removeEvent = function (index) {
+        $ev.day.objects.splice(index, 1)
+    };
+
+    $ev.timeRangeChanged = function () {
+        //reset button to generate if value changes
+        $ev.rstBtn();
+        $ev.datepicker.show = true;
+
+        switch ($ev.docData.timeRange.range){
+            case "w":
+                $ev.datepicker.format = "'Woche' w, MMMM yyyy";
+                break;
+            case "m":
+                $ev.datepicker.format = "MMMM yyyy";
+                break;
+            case "y":
+                $ev.datepicker.format = "yyyy";
+                break;
+        }
+    };
+
+    $ev.ok = function () {
+        $uibModalInstance.close();
+    };
+
+    $ev.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
 });
 
 app.controller('changeUserModalInstanceCtrl', function ($uibModalInstance, AuthService, user) {

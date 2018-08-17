@@ -21,7 +21,7 @@ app.controller('loginViewController', ['$scope', '$location', 'AuthService', fun
         // handle error
         .catch(function () {
           $scope.error = true;
-          $scope.errorMessage = "Falsche Name/Passwort Kombination oder du bist kein Admin";
+          $scope.errorMessage = "Unbekannte Name/Passwort Kombination!";
           $scope.loading = false;
           $scope.login = {};
         });
